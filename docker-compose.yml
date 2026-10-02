@@ -1,0 +1,19 @@
+# Week 1: one service. In Week 4 this splits into retrieval / compass / llm-gateway
+# services, but every experiment (A-E) keeps running from these same images.
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./configs:/app/configs
+      - hf_cache:/app/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  hf_cache:

@@ -1,0 +1,1 @@
+{"text": "{\"question\":\"According to the table, what is the BIC difference between the \u039bCDM model and the CC+SNIa+BAO+CMB model?\",\"reference_answer\":\"The BIC difference is 0.0, indicating that the CC+SNIa+BAO+CMB model has the same BIC value as the \u039bCDM model.\"}", "prompt_tokens": 762, "completion_tokens": 93}

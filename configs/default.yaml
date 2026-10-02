@@ -1,0 +1,56 @@
+corpus:
+  # DECISION FOR WEEK 1: a narrow subtopic gives you real cross-paper conflicts
+  # (needed for multi-hop / conflicting-findings questions). Example below.
+  categories: ["astro-ph.CO", "astro-ph.GA"]
+  keywords: ["hubble tension"]        # [] = no keyword filter
+  max_papers: 150
+  date_from: "2022-01-01"
+  raw_dir: data/raw
+  processed_dir: data/processed
+  request_delay_s: 3.0                # arXiv asks for >= 3s between requests
+
+chunking:
+  max_chars: 1800
+  overlap_chars: 200
+  min_chars: 200
+
+embedding:
+  model: BAAI/bge-small-en-v1.5       # small, CPU-friendly
+  query_prefix: "Represent this sentence for searching relevant passages: "
+
+reranker:
+  model: cross-encoder/ms-marco-MiniLM-L-6-v2   # light CPU cross-encoder
+
+retrieval:
+  index_dir: data/index
+  dense_k: 20
+  bm25_k: 20
+  rrf_k: 60
+
+# Starting points, to be tuned in Weeks 2-4. Every experiment (A-E) uses these
+# SAME strategies; only the router that picks one changes.
+strategies:
+  VANILLA:   {use_hybrid: false, rerank: false, decompose: false, final_k: 5}   # Exp A
+  STATIC:    {use_hybrid: true,  rerank: true,  decompose: false, final_k: 8}   # Exp B
+  SIMPLE:    {use_hybrid: false, rerank: false, decompose: false, final_k: 5}
+  MULTI_HOP: {use_hybrid: true,  rerank: true,  decompose: true,  final_k: 8}
+  UNCERTAIN: {use_hybrid: true,  rerank: true,  decompose: true,  final_k: 10}
+  STATIC_K10: {use_hybrid: true,  rerank: true,  decompose: false, final_k: 10}
+
+router:
+  escalation_threshold: 0.70          # sweep 0.5-0.9 in Week 5, do not treat as fixed
+
+llm:
+  base_url: https://api.groq.com/openai/v1
+  api_key_env: GROQ_API_KEY
+  model: openai/gpt-oss-20b           # Groq's llama-3.x models are Enterprise-only now; run scripts/list_models.py to see YOUR options
+  reasoning_effort: low               # gpt-oss are reasoning models. Set to null for non-reasoning models
+  token_headroom: 400                 # extra completion budget so hidden reasoning can't starve the visible answer
+  max_retries: 2                 # at most 3 total attempts; SDK retries are disabled
+  retry_base_seconds: 1.0
+  retry_max_seconds: 4.0         # current policy waits at most 1 + 2 = 3 seconds
+  cache_dir: data/llm_cache
+  cache_namespace: default            # change namespace to force fresh calls on a stability rerun
+
+tracking:
+  project: atlasrag

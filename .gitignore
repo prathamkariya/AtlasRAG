@@ -1,0 +1,17 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.bak
+*.log
+
+data/raw/pdf/
+data/retrieval/
+data/index/
+*.npy
+
+_patch_*/
+*.zip
+
+data/bench/*pilot*.jsonl

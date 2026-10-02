@@ -1,0 +1,1 @@
+{"text": "{\"question\":\"What is the expression for the Hubble parameter ratio E(z) in the flat \u039bCDM model used in the analysis?\",\"reference_answer\":\"E(z) \u2261 H(z)/H0 = [\u03a9m0(1+z)^3 + \u03a9r0(1+z)^4 + (1\u2212\u03a9m0\u2212\u03a9r0)]^{1/2}.\"}", "prompt_tokens": 573, "completion_tokens": 96}

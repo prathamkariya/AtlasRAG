@@ -1,0 +1,45 @@
+{
+  "group": "run1",
+  "experiment": "A_vanilla",
+  "llm_model": "openai/gpt-oss-20b",
+  "cache_namespace": "default",
+  "questions_hash": "b4bd0d144072",
+  "strategies": {
+    "VANILLA": {
+      "use_hybrid": false,
+      "rerank": false,
+      "decompose": false,
+      "final_k": 5
+    },
+    "STATIC": {
+      "use_hybrid": true,
+      "rerank": true,
+      "decompose": false,
+      "final_k": 8
+    },
+    "SIMPLE": {
+      "use_hybrid": false,
+      "rerank": false,
+      "decompose": false,
+      "final_k": 5
+    },
+    "MULTI_HOP": {
+      "use_hybrid": true,
+      "rerank": true,
+      "decompose": true,
+      "final_k": 8
+    },
+    "UNCERTAIN": {
+      "use_hybrid": true,
+      "rerank": true,
+      "decompose": true,
+      "final_k": 10
+    }
+  },
+  "escalation": null,
+  "git_commit": "unknown",
+  "started": "2026-10-02T10:36:15",
+  "retrieval_only": true,
+  "router": "fixed:VANILLA",
+  "n_questions": 27
+}

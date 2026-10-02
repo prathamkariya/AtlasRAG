@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AtlasRAG V1 — Adaptive Retrieval Routing for Scientific Literature</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F4EC;
+    --paper-raised: #FBFAF5;
+    --ink: #1E2430;
+    --ink-soft: #4A5266;
+    --rule: #DAD4C4;
+    --evidence: #2F6F63;
+    --evidence-soft: #E4EFEC;
+    --accent: #A8752F;
+    --accent-soft: #F2E7D3;
+    --danger: #8C4A3B;
+    --danger-soft: #F3E6E1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #191A17; --paper-raised: #202119; --ink: #EDE9DD; --ink-soft: #AFA998;
+      --rule: #38392F; --evidence: #6FB6A6; --evidence-soft: #22332E;
+      --accent: #D2A360; --accent-soft: #332918; --danger: #C98A78; --danger-soft: #3A2620;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #191A17; --paper-raised: #202119; --ink: #EDE9DD; --ink-soft: #AFA998;
+    --rule: #38392F; --evidence: #6FB6A6; --evidence-soft: #22332E;
+    --accent: #D2A360; --accent-soft: #332918; --danger: #C98A78; --danger-soft: #3A2620;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.6;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px 96px; }
+  .masthead { border-bottom: 3px solid var(--ink); padding: 56px 0 28px; margin-bottom: 44px; }
+  .masthead .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 18px; }
+  .masthead h1 { font-family: "Source Serif 4", serif; font-weight: 700; font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.08; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .masthead .subtitle { font-family: "Source Serif 4", serif; font-style: italic; font-weight: 400; font-size: 1.2rem; color: var(--ink-soft); margin: 0 0 26px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 6px 28px; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-soft); }
+  .meta-row span b { color: var(--ink); font-weight: 500; }
+  h2 { font-family: "Source Serif 4", serif; font-weight: 600; font-size: 1.45rem; margin: 54px 0 6px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; gap: 12px; }
+  h2 .num { font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+  h3 { font-family: "Source Serif 4", serif; font-weight: 600; font-size: 1.1rem; margin: 28px 0 10px; }
+  p { margin: 14px 0; max-width: 68ch; }
+  .lede { font-family: "Source Serif 4", serif; font-size: 1.2rem; line-height: 1.55; border-left: 3px solid var(--evidence); padding: 4px 0 4px 20px; margin: 20px 0 8px; }
+  ul, ol { padding-left: 22px; margin: 12px 0; }
+  li { margin: 7px 0; }
+  a { color: var(--evidence); }
+  .diagram { background: var(--paper-raised); border: 1px solid var(--rule); border-radius: 6px; padding: 26px 18px; margin: 20px 0; }
+  .flow-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .node { font-family: "IBM Plex Mono", monospace; font-size: 12px; text-align: center; padding: 9px 12px; border: 1px solid var(--rule); border-radius: 5px; background: var(--paper); color: var(--ink-soft); min-width: 100px; }
+  .node.core { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 500; }
+  .node.swap { border: 1.5px dashed var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 500; }
+  .arrow-down { text-align: center; color: var(--ink-soft); font-size: 14px; margin: 5px 0; opacity: 0.65; }
+  .branch-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-align: center; color: var(--ink-soft); margin-bottom: 3px; }
+  .callout { background: var(--evidence-soft); border: 1px solid var(--evidence); border-radius: 6px; padding: 16px 18px; margin: 20px 0; font-size: 0.95rem; }
+  .callout b { color: var(--evidence); }
+  .callout.warn { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.warn b { color: var(--accent); }
+  .callout.key { background: var(--danger-soft); border-color: var(--danger); }
+  .callout.key b { color: var(--danger); }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.91rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-soft); font-weight: 500; border-bottom: 1px solid var(--ink); }
+  td:first-child, th:first-child { padding-left: 0; }
+  .phase { display: grid; grid-template-columns: 48px 1fr; gap: 4px 16px; margin: 20px 0; }
+  .phase .p-num { font-family: "Source Serif 4", serif; font-size: 1.5rem; color: var(--rule); font-weight: 600; }
+  .phase .p-body h3 { margin: 0 0 6px; }
+  .phase .p-body .weeks { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-soft); margin-bottom: 6px; display: inline-block; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px dashed var(--rule); }
+  .checklist li::before { content: ""; width: 14px; height: 14px; margin-top: 3px; border: 1.5px solid var(--ink-soft); border-radius: 3px; flex-shrink: 0; }
+  code, .inline-code { font-family: "IBM Plex Mono", monospace; font-size: 0.87em; background: var(--paper-raised); border: 1px solid var(--rule); padding: 1px 6px; border-radius: 4px; }
+  .faq-q { font-family: "Source Serif 4", serif; font-weight: 600; font-size: 1.01rem; margin: 24px 0 4px; }
+  .resume-block { font-family: "Source Serif 4", serif; font-style: italic; font-size: 1.02rem; line-height: 1.6; background: var(--paper-raised); border-left: 3px solid var(--accent); padding: 16px 20px; margin: 16px 0; }
+  .quote-block { font-family: "IBM Plex Mono", monospace; font-size: 0.86rem; background: var(--paper-raised); border: 1px solid var(--rule); border-left: 3px solid var(--danger); padding: 14px 18px; margin: 16px 0; line-height: 1.55; }
+  footer { margin-top: 68px; padding-top: 22px; border-top: 1px solid var(--rule); font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  @media (max-width: 480px) {
+    .wrap { padding: 0 16px 72px; }
+    .masthead { padding-top: 36px; }
+    table { font-size: 0.8rem; }
+    th, td { padding: 7px 5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="kicker">WORKING PAPER · DRAFT V2 — REVISED SCOPE · SCIENTIFIC RAG</div>
+    <h1>AtlasRAG V1</h1>
+    <p class="subtitle">Adaptive retrieval routing for scientific literature — a replication and extension</p>
+    <div class="meta-row">
+      <span><b>Author</b> Pratham Kariya (Megamind)</span>
+      <span><b>Domain</b> Astrophysics (arXiv)</span>
+      <span><b>License</b> MIT (code) · CC-BY (writeup)</span>
+    </div>
+  </div>
+
+  <h2><span class="num">01</span> The research question</h2>
+  <p class="lede">Does adaptive retrieval routing provide consistent benefits for scientific-literature QA, or are its gains concentrated in particular question types and evidence structures?</p>
+  <p>Narrower and more testable than the original framing — and honest about what is and isn't new (see §2).</p>
+
+  <h2><span class="num">02</span> Positioning — what's actually novel</h2>
+  <div class="callout key">
+    <b>Adaptive query-complexity routing is established prior art.</b> It is not a new idea, and this project does not claim otherwise.
+  </div>
+  <p>This is grounded in and explicitly builds on:</p>
+  <ul>
+    <li><b>Adaptive-RAG</b> (Jeong et al., 2024) — a small classifier routes queries among no-retrieval / single-step / multi-step strategies by predicted complexity. Structurally the same idea as Compass V1.</li>
+    <li><b>Self-RAG</b> (Asai et al., 2024) — retrieval decisions embedded in generation via reflection tokens.</li>
+    <li><b>FLARE</b> (Jiang et al., 2023) — generation-probability signals as the retrieval trigger.</li>
+    <li><b>RAGRouter-Bench</b> (2026) — notes that classifier-based routing is now settled; differentiation comes from domain and implementation.</li>
+    <li><b>RouteLLM, FrugalGPT, RouterBench, Hybrid LLM</b> — same paradigm applied to model selection; cited for the cost/quality framing Compass borrows.</li>
+  </ul>
+  <p>The defensible contribution is <b>not</b> the routing mechanism. It is:</p>
+  <ol>
+    <li>Applying it to <b>scientific literature</b> — multi-paper conflicts, temporal supersession, tables/equations — a setting existing adaptive-RAG benchmarks mostly don't test.</li>
+    <li>A <b>failure taxonomy</b> specific to scientific evidence (§8.3).</li>
+    <li>A <b>stratified evaluation</b> testing whether routing helps uniformly or only for specific question types (H4, §7).</li>
+    <li>An <b>Oracle ceiling analysis</b> (§6) quantifying real headroom on this domain.</li>
+  </ol>
+  <h3>Required wording, everywhere this project is described</h3>
+  <div class="quote-block">"Compass implements and extends the adaptive retrieval-routing paradigm established by Adaptive-RAG for scientific literature, with emphasis on question-type-specific behavior and scientific evidence structure."</div>
+
+  <h2><span class="num">03</span> A note on Jev</h2>
+  <div class="callout warn"><b>Jev is not free</b> — early access, waitlist-gated, $0.042/M input tokens, no free tier. A free-tier student project can't be built on it directly.</div>
+  <p>So AtlasRAG doesn't call Jev. We build <b>Compass</b> — a frozen small base + LoRA adapter + lightweight scoring head, the publicly documented Kev-style recipe. Fully open, fully free, fully ours.</p>
+
+  <h2><span class="num">04</span> Compass V1 — reduced scope</h2>
+  <p>Compass V1 has <b>one job</b>: query routing.</p>
+  <table>
+    <tr><th>Input</th><th>Output</th></tr>
+    <tr><td>"What is the main finding of this paper?"</td><td><code>SIMPLE</code> · confidence 0.94</td></tr>
+    <tr><td>"Compare the evidence for X across these papers."</td><td><code>MULTI_HOP</code> · confidence 0.87</td></tr>
+  </table>
+  <div class="callout">
+    With routing as the only variable, the experiment stays clean: does adaptive routing itself help? Evidence verification and failure prediction are deferred to V2/V3 (§10) — not built in parallel.
+  </div>
+
+  <h2><span class="num">05</span> System architecture — one pipeline, a swappable router</h2>
+  <p>Every experiment is structurally identical except for who makes the routing call. If every branch performs the same retrieval regardless, the router isn't being tested at all.</p>
+  <div class="diagram">
+    <div class="flow-row"><div class="node">Scientific query</div></div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row"><div class="node swap">ROUTER — swapped per experiment</div></div>
+    <div class="arrow-down">↓ routes by difficulty + confidence</div>
+    <div class="flow-row">
+      <div class="node">Simple<br>→ dense retrieval</div>
+      <div class="node">Multi-hop<br>→ query decomposition</div>
+      <div class="node">Uncertain<br>→ escalate</div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row"><div class="node">Hybrid retrieval</div></div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row"><div class="node">Reranker</div></div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row"><div class="node">LLM</div></div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row"><div class="node core">Answer + citations</div></div>
+    <div class="arrow-down">↓</div>
+    <div class="flow-row"><div class="node">Evaluation — stratified by question type</div></div>
+  </div>
+
+  <h2><span class="num">06</span> Five experiments</h2>
+  <table>
+    <tr><th></th><th>Experiment</th><th>Router</th><th>Purpose</th></tr>
+    <tr><td><b>A</b></td><td>Vanilla RAG</td><td>None — naive dense only</td><td>Absolute floor</td></tr>
+    <tr><td><b>B</b></td><td>Strong static RAG</td><td>None — fixed hybrid+rerank always</td><td>Isolates retrieval quality from routing</td></tr>
+    <tr><td><b>C</b></td><td>LLM router</td><td>Full LLM decides</td><td>Upper bound on router quality, at full cost</td></tr>
+    <tr><td><b>D</b></td><td>Compass router</td><td>Self-trained LoRA</td><td>The system under test</td></tr>
+    <tr><td><b>E</b></td><td>Oracle</td><td>Perfect selection (gold labels)</td><td>Theoretical ceiling</td></tr>
+  </table>
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="node">Static RAG&nbsp;&nbsp;82%</div>
+      <div class="node">LLM Router&nbsp;&nbsp;84%</div>
+      <div class="node">Compass&nbsp;&nbsp;83%</div>
+      <div class="node core">Oracle&nbsp;&nbsp;91%</div>
+    </div>
+    <p style="text-align:center; font-size:0.85rem; color:var(--ink-soft); margin-top:14px;">Routing has real headroom — Compass captures some of it. (If Oracle ≈ Static, routing isn't worth much on this workload — an equally valid, equally useful outcome.)</p>
+  </div>
+
+  <h2><span class="num">07</span> Hypotheses</h2>
+  <ul>
+    <li><b>H1</b> — Adaptive retrieval improves answer quality on complex scientific questions vs. a fixed strategy.</li>
+    <li><b>H2</b> — Compass can approximate an LLM router at substantially less computation.</li>
+    <li><b>H3</b> — Confidence-based escalation reduces expensive LLM calls while maintaining a quality threshold.</li>
+    <li><b>H4</b> — The benefit of adaptive routing is concentrated in particular question types and evidence structures, not uniform.</li>
+  </ul>
+  <div class="callout"><b>H4 is the project's best shot at a genuinely new finding</b> — it's the one dimension the prior-art papers in §2 don't test on this domain.</div>
+
+  <h2><span class="num">08</span> Benchmark design</h2>
+  <h3>8.1 Metrics</h3>
+  <table>
+    <tr><th>Category</th><th>Metric</th></tr>
+    <tr><td>Answer quality</td><td>Correctness, relevance</td></tr>
+    <tr><td>Retrieval quality</td><td>Context precision, context recall</td></tr>
+    <tr><td>Grounding</td><td>Faithfulness score</td></tr>
+    <tr><td>Efficiency</td><td>Latency (p50/p95), LLM calls, tokens, $/query</td></tr>
+    <tr><td>Routing quality</td><td>Accuracy vs. gold path, per router (C/D vs. E)</td></tr>
+  </table>
+  <h3>8.2 Question set — stratified by type</h3>
+  <ul>
+    <li>Simple factual lookup</li><li>Multi-hop (2+ papers)</li><li>Conflicting findings</li>
+    <li>Temporal (superseded results)</li><li>Abstract → methods → results chains</li>
+  </ul>
+  <p style="font-size:0.9rem;">Every metric is reported overall <i>and</i> broken down by these five categories — this is what tests H4.</p>
+  <h3>8.3 Gold evidence (for Oracle and later V3)</h3>
+  <div class="quote-block">Retrieval failure occurs when the retrieved evidence does not contain sufficient information to answer the question correctly.</div>
+  <h3>8.4 Benchmark honesty</h3>
+  <div class="callout warn">Rankings have been shown to <b>flip between two identical runs</b> of a benchmark from ordinary variance. Run every comparison twice before trusting it.</div>
+
+  <h2><span class="num">09</span> Build phases</h2>
+  <div class="phase"><div class="p-num">1</div><div class="p-body"><span class="weeks">WEEK 1</span><h3>Corpus + baseline</h3><p>Astrophysics papers via arXiv API. Section-aware chunking. Embeddings, BM25, hybrid retrieval, reranking. Experiments A/B.</p></div></div>
+  <div class="phase"><div class="p-num">2</div><div class="p-body"><span class="weeks">WEEK 2</span><h3>Benchmark</h3><p>Five question categories. Gold-evidence labels. Baseline metrics. Confirm reproducibility.</p></div></div>
+  <div class="phase"><div class="p-num">3</div><div class="p-body"><span class="weeks">WEEK 3</span><h3>Compass</h3><p>Labeled routing data. LoRA fine-tune on Kaggle free tier. Evaluate routing accuracy in isolation first.</p></div></div>
+  <div class="phase"><div class="p-num">4</div><div class="p-body"><span class="weeks">WEEK 4</span><h3>Adaptive integration</h3><p>Wire Compass into the shared architecture via LangGraph. Run C, D, E alongside A/B — identical paths, swapped router only.</p></div></div>
+  <div class="phase"><div class="p-num">5</div><div class="p-body"><span class="weeks">WEEK 5</span><h3>Evaluation + polish</h3><p>All five experiments. Rerun for stability. Stratified analysis (H4). Charts, repo cleanup, short report.</p></div></div>
+  <p style="font-size:0.9rem; color:var(--ink-soft);"><b>3 weeks</b> = minimum serious prototype · <b>4–5 weeks</b> = strong, polished V1.</p>
+  <h3>V2 (after V1 is stable) — Evidence verification</h3>
+  <p>Can Compass verify citation support as effectively as an LLM judge?</p>
+  <h3>V3 (after V2) — Retrieval-failure prediction</h3>
+  <p>Trained only against the §8.3 gold-evidence definition, to avoid circularity.</p>
+
+  <h2><span class="num">10</span> Cloud / DevOps — infrastructure from day one, not a research variable</h2>
+  <p>Built in from the start, but it stays infrastructure — never something the research question depends on.</p>
+  <h3>In V1, from Week 1</h3>
+  <ul>
+    <li><b>Containerized from day one</b> — <code>docker-compose</code> with separate services for retrieval, Compass, and the LLM gateway. All five experiments run from the same containers; only the router swaps.</li>
+    <li><b>Experiment tracking from day one</b> — every run and rerun logged to Weights &amp; Biases.</li>
+    <li><b>API exposed from day one</b> — a thin FastAPI layer; a callable service from the first working version, not just a notebook.</li>
+    <li><b>Reproducible deployment</b> — pinned dependencies, one <code>docker-compose up</code> reproduces the full benchmark.</li>
+  </ul>
+  <h3>Deferred to a later, explicit extension</h3>
+  <p>Kubernetes (k3s on Oracle Always Free), canary rollout, drift detection, CI-gated regression testing. Still on the long-term roadmap — just not allowed to delay or become the research in §1.</p>
+
+  <h2><span class="num">11</span> Tech stack — 100% free tier</h2>
+  <table>
+    <tr><th>Layer</th><th>Tool</th><th>When</th></tr>
+    <tr><td>Orchestration</td><td>LangGraph</td><td>Week 4</td></tr>
+    <tr><td>Decision model</td><td>Compass (self-trained LoRA)</td><td>Week 3</td></tr>
+    <tr><td>Embeddings</td><td>Cohere Embed v3 trial / bge-large</td><td>Week 1</td></tr>
+    <tr><td>Reranking</td><td>Cohere Rerank v3 trial / bge-reranker</td><td>Week 1</td></tr>
+    <tr><td>LLM calls</td><td>Groq + Gemini free tiers</td><td>V1</td></tr>
+    <tr><td>Vector store</td><td>Supabase pgvector / Chroma</td><td>Week 1</td></tr>
+    <tr><td>Training compute</td><td>Kaggle (30 GPU-hrs/week)</td><td>Week 3</td></tr>
+    <tr><td>Containerization</td><td>Docker / docker-compose</td><td>Week 1 — from the start</td></tr>
+    <tr><td>API layer</td><td>FastAPI</td><td>Week 1 — from the start</td></tr>
+    <tr><td>Experiment tracking</td><td>Weights &amp; Biases</td><td>Week 1 — from the start</td></tr>
+    <tr><td>Model hosting</td><td>Hugging Face Hub</td><td>Week 3+</td></tr>
+    <tr><td>Eval framework</td><td>Ragas / ARES</td><td>Week 2</td></tr>
+    <tr><td>CI/CD</td><td>GitHub Actions</td><td>Extension, post-V1</td></tr>
+    <tr><td>Deployment at scale</td><td>Oracle Always Free + k3s</td><td>Extension, post-V1</td></tr>
+  </table>
+  <div class="callout"><b>Student email:</b> qualifies you for the GitHub Student Developer Pack — bundled credits across partner tools. Claim it in Week 1; some offers are one-time, tied to account age.</div>
+
+  <h2><span class="num">12</span> Account checklist</h2>
+  <ul class="checklist">
+    <li>Kaggle account (GPU quota)</li>
+    <li>Hugging Face account</li>
+    <li>GitHub + Student Developer Pack (university email)</li>
+    <li>Groq API key</li>
+    <li>Gemini API key</li>
+    <li>Cohere trial key</li>
+    <li>Supabase account</li>
+    <li>Weights &amp; Biases account</li>
+    <li>Docker installed locally</li>
+    <li>Oracle Cloud account (Always Free — extension only)</li>
+  </ul>
+
+  <h2><span class="num">13</span> Related resources &amp; references</h2>
+  <h3>Direct prior art — cite explicitly</h3>
+  <ul>
+    <li>Adaptive-RAG — Jeong et al., 2024 — <a href="https://arxiv.org/abs/2403.14403">arxiv.org/abs/2403.14403</a> · <a href="https://github.com/starsuzi/Adaptive-RAG">code</a></li>
+    <li>Self-RAG — Asai et al., 2024</li>
+    <li>FLARE — Jiang et al., 2023</li>
+    <li>RAGRouter-Bench (2026)</li>
+  </ul>
+  <h3>Model-routing analogues</h3>
+  <ul><li>RouteLLM, FrugalGPT, RouterBench, Hybrid LLM</li></ul>
+  <h3>Frameworks</h3>
+  <ul>
+    <li>LangGraph — <a href="https://github.com/langchain-ai/langgraph">github.com/langchain-ai/langgraph</a></li>
+    <li>Ragas — <a href="https://github.com/explodinggradients/ragas">github.com/explodinggradients/ragas</a></li>
+    <li>ARES — <a href="https://github.com/stanford-futuredata/ARES">github.com/stanford-futuredata/ARES</a></li>
+  </ul>
+  <h3>Data sources</h3>
+  <ul>
+    <li>arXiv API — <a href="https://info.arxiv.org/help/api/">info.arxiv.org/help/api</a></li>
+    <li>Semantic Scholar API — <a href="https://api.semanticscholar.org/">api.semanticscholar.org</a></li>
+  </ul>
+
+  <h2><span class="num">14</span> FAQ</h2>
+  <p class="faq-q">Is this novel, or a replication?</p>
+  <p>Both. The routing mechanism replicates Adaptive-RAG's established pattern. The contribution is applying it rigorously to scientific literature with a stratified evaluation and Oracle ceiling analysis the prior-art papers don't run on this domain.</p>
+  <p class="faq-q">Do we use Jev?</p>
+  <p>No — paid and waitlist-gated. We build Compass instead, free and fully ours.</p>
+  <p class="faq-q">Why five experiments, not four?</p>
+  <p>The Oracle answers a different question than the others — not "which router is best" but "how much is there to gain from routing at all." Without it, a weak result is ambiguous between "routing doesn't help" and "our router is bad."</p>
+  <p class="faq-q">Does the Docker/API/tracking layer slow down the research?</p>
+  <p>No — it's lightweight by design. Kubernetes-scale infrastructure is what's deferred, not basic reproducibility tooling.</p>
+  <p class="faq-q">What if H1–H3 come back negative?</p>
+  <p>Still a real, reportable result — a well-run negative finding with a solid Oracle analysis is more credible than an inflated positive claim.</p>
+
+  <h2><span class="num">15</span> Resume / LinkedIn framing</h2>
+  <div class="resume-block">"Built AtlasRAG V1, a controlled study of adaptive retrieval-routing (extending Adaptive-RAG) for scientific-literature QA — implementing a self-trained LoRA router (Compass) and comparing it against static, LLM-routed, and oracle-ceiling baselines across five structurally identical pipelines, with results stratified by question type. Containerized and tracked from day one (Docker, FastAPI, W&amp;B) for full reproducibility."</div>
+  <p style="font-size:0.9rem; color:var(--ink-soft);">Once real experiments produce numbers, replace the generic claim with specifics — never invent X or Y before running the experiment.</p>
+
+  <footer>
+    <span>AtlasRAG V1 — Working Paper</span>
+    <span>Draft v2 — Revised Scope</span>
+  </footer>
+
+</div>
+</body>
+</html>

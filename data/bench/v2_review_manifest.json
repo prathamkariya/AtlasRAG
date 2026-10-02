@@ -1,0 +1,263 @@
+[
+  {
+    "id": "simple-b23afa21",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-720cb1dd",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-f56a29b4",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-8ff9af33",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "MULTI_HOP",
+    "v2": "MULTI_HOP"
+  },
+  {
+    "id": "simple-7db5a913",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-0d2875c1",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-20b8fd1e",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-90464d48",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-f211e877",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-192b22fb",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-4b1010ad",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "MULTI_HOP",
+    "v2": "MULTI_HOP"
+  },
+  {
+    "id": "simple-2e25b258",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-baecd433",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "MULTI_HOP",
+    "v2": "MULTI_HOP"
+  },
+  {
+    "id": "simple-a0f41718",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-579634ff",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "simple-95213478",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "MULTI_HOP",
+    "v2": "MULTI_HOP"
+  },
+  {
+    "id": "simple-a866dcd2",
+    "qtype": "simple",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": true,
+    "v1": "SIMPLE",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "multi_hop-0760df1d",
+    "qtype": "multi_hop",
+    "audit_ok": false,
+    "audit_reasons": [
+      "not_all_passages_needed"
+    ],
+    "sufficient": true,
+    "v1": "UNCERTAIN",
+    "v2": "UNCERTAIN"
+  },
+  {
+    "id": "multi_hop-a55a4306",
+    "qtype": "multi_hop",
+    "audit_ok": false,
+    "audit_reasons": [
+      "answer_not_supported",
+      "not_all_passages_needed"
+    ],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "multi_hop-32126f6b",
+    "qtype": "multi_hop",
+    "audit_ok": false,
+    "audit_reasons": [
+      "not_all_passages_needed"
+    ],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "MULTI_HOP"
+  },
+  {
+    "id": "multi_hop-3cafd9d7",
+    "qtype": "multi_hop",
+    "audit_ok": false,
+    "audit_reasons": [
+      "answer_not_supported",
+      "not_all_passages_needed"
+    ],
+    "sufficient": true,
+    "v1": "UNCERTAIN",
+    "v2": "UNCERTAIN"
+  },
+  {
+    "id": "multi_hop-3e7379ed",
+    "qtype": "multi_hop",
+    "audit_ok": false,
+    "audit_reasons": [
+      "not_all_passages_needed"
+    ],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "MULTI_HOP"
+  },
+  {
+    "id": "multi_hop-c1b11062",
+    "qtype": "multi_hop",
+    "audit_ok": false,
+    "audit_reasons": [
+      "not_all_passages_needed"
+    ],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "temporal-c49495fc",
+    "qtype": "temporal",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "temporal-a8985ff7",
+    "qtype": "temporal",
+    "audit_ok": false,
+    "audit_reasons": [
+      "different_quantity"
+    ],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "chain-505459d1",
+    "qtype": "chain",
+    "audit_ok": true,
+    "audit_reasons": [],
+    "sufficient": false,
+    "v1": "UNCERTAIN",
+    "v2": "SIMPLE"
+  },
+  {
+    "id": "chain-e650cfbd",
+    "qtype": "chain",
+    "audit_ok": false,
+    "audit_reasons": [
+      "not_all_passages_needed"
+    ],
+    "sufficient": true,
+    "v1": "MULTI_HOP",
+    "v2": "MULTI_HOP"
+  }
+]
