@@ -1,0 +1,23 @@
+{
+  "data\\bench\\questions.jsonl": "bf799c49223e6cab",
+  "data\\bench\\questions_v1_frozen.jsonl": "bf799c49223e6cab",
+  "results\\run1\\A_vanilla.jsonl": "9e0f36da4c449363",
+  "results\\run1\\A_vanilla.meta.json": "788fbe3ab89954cd",
+  "results\\run1\\B_static.jsonl": "401d90bb83f9cf91",
+  "results\\run1\\B_static.meta.json": "7c018fa404ceb15e",
+  "results\\run1\\C_llm_router.jsonl": "88a298c4ad5c5bdd",
+  "results\\run1\\C_llm_router.meta.json": "de80f015ec485f77",
+  "results\\run1\\D_compass.jsonl": "e3b0c44298fc1c14",
+  "results\\run1\\D_compass.meta.json": "e6e0efac201a0e46",
+  "results\\run1\\E_oracle.jsonl": "435fe46df5a24f6e",
+  "results\\run1\\E_oracle.meta.json": "f269ff2bcdebe42c",
+  "results\\run1\\F_always_uncertain.jsonl": "7d2fb238740c56d5",
+  "results\\run1\\F_always_uncertain.meta.json": "92954a36753dfa71",
+  "results\\run1\\G_always_multi_hop.jsonl": "06abb13fd94d0b09",
+  "results\\run1\\G_always_multi_hop.meta.json": "6d536cb6c4150ad4",
+  "results\\run1\\K_static_k10.jsonl": "97576701abef1871",
+  "results\\run1\\K_static_k10.meta.json": "3a19d355b1d5a2c3",
+  "results\\run1\\report.md": "e1dd22539996400f",
+  "src\\atlasrag\\bench\\experiments.py": "fa2091eefbacdd70",
+  "src\\atlasrag\\bench\\oracle_v2.py": "3dce2e4091d34167"
+}

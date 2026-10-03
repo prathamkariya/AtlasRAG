@@ -15,3 +15,7 @@ _patch_*/
 *.zip
 
 data/bench/*pilot*.jsonl
+
+.vscode/
+audit_report.txt
+sections.csv
