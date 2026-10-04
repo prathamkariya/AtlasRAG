@@ -29,7 +29,8 @@ def sh(*cmd):
 
 
 def sha(p):
-    return hashlib.sha256(Path(p).read_bytes()).hexdigest()[:16]
+    """Line-ending-normalized, so the SAME file hashes identically on Windows (CRLF checkout) and Linux/CI (LF)."""
+    return hashlib.sha256(Path(p).read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:16]
 
 
 def frozen_files():
@@ -82,7 +83,7 @@ for f in ["src/atlasrag/bench/generate_v2.py", "src/atlasrag/bench/generate.py",
 # ---- 2. frozen assets ----
 head("2. FROZEN ASSETS")
 snap = ROOT / "audit" / "frozen_hashes.json"
-cur = {str(p.relative_to(ROOT)): sha(p) for p in frozen_files() if p.exists()}
+cur = {p.relative_to(ROOT).as_posix(): sha(p) for p in frozen_files() if p.exists()}   # POSIX keys: same on Windows/Linux
 missing = [f for f in FROZEN if not (ROOT / f).exists()]
 empty = [str(p.relative_to(ROOT)) for p in frozen_files() if p.exists() and p.stat().st_size == 0]
 if empty:
@@ -94,7 +95,7 @@ if a.snapshot:
     snap.write_text(json.dumps(cur, indent=2, sort_keys=True))
     print(f"wrote {snap.relative_to(ROOT)} ({len(cur)} files). Commit it; later runs will verify against it.")
 elif snap.exists():
-    ref = json.loads(snap.read_text())
+    ref = {k.replace("\\", "/"): v for k, v in json.loads(snap.read_text()).items()}   # accept snapshots written on Windows
     bad = [k for k in ref if cur.get(k) != ref[k]]
     new = [k for k in cur if k not in ref]
     print("frozen assets UNCHANGED vs snapshot" if not bad else f"CHANGED/MISSING vs snapshot: {bad}")
