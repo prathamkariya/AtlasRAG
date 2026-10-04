@@ -19,3 +19,4 @@ data/bench/*pilot*.jsonl
 .vscode/
 audit_report.txt
 sections.csv
+docs/

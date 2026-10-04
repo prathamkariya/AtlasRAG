@@ -219,7 +219,8 @@ class ValidatedGenerator(Generator):
                               section_a=chunks[j]["section"], section_b=chunks[i]["section"])
             assessed = assess_cross_paper_pair(*args, **kwargs)
             if assessed.reason:
-                self.vstats[f"pair_{assessed.reason}"] += 1
+                self.vstats[f"pair_{assessed.reason}"] += 1               # legacy key (all types mixed)
+                self.vstats[f"pair:{qtype}:{assessed.reason}"] += 1       # attributable per type
                 continue
             ranked.append((j, assessed.score + rank_bonus.get(j, 0.0)))
         return sorted(ranked, key=lambda pair: (-pair[1], pair[0]))[:limit]
@@ -239,7 +240,8 @@ class ValidatedGenerator(Generator):
             assessed = assess_chain_pair(chunks[abstract]["text"], chunk["text"],
                                          same_paper=True, section=chunk["section"])
             if assessed.reason:
-                self.vstats[f"pair_{assessed.reason}"] += 1
+                self.vstats[f"pair_{assessed.reason}"] += 1               # legacy key (all types mixed)
+                self.vstats[f"pair:chain:{assessed.reason}"] += 1         # attributable per type
                 continue
             ranked.append((abstract, j, assessed.score + self._cosine_similarity(abstract, j)))
         return sorted(ranked, key=lambda pair: (-pair[2], pair[1]))[:limit]
@@ -304,6 +306,13 @@ class ValidatedGenerator(Generator):
         return True
 
     def make(self, qtype, split):
+        q = self._make(qtype, split)
+        self.vstats[f"attempt:{qtype}"] += 1
+        if q is not None:
+            self.vstats[f"survived:{qtype}"] += 1
+        return q
+
+    def _make(self, qtype, split):
         pool = self.pool[split]
         if not pool:
             return None
