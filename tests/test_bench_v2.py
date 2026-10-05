@@ -13,6 +13,7 @@ from atlasrag.bench.generate_v2 import (
     assess_cross_paper_pair,
     has_shared_scientific_signal,
     scientific_signals,
+    specific_scientific_signals,
 )
 from atlasrag.bench.oracle_v2 import derive_oracle_v2, training_pairs
 from atlasrag.bench.diagnostics import diagnose, to_markdown
@@ -212,6 +213,12 @@ def test_pair_sourcing_rejects_broad_topic_overlap_without_a_shared_anchor():
         qtype="multi_hop", dense_similarity=0.8,
     )
     assert assessed.reason == "no_shared_specific_signal"
+
+
+def test_specific_signal_extraction_handles_unicode_cosmology_symbols():
+    assert {"\u03c9_b", "\u03bbcdm", "\u03b4neff"} <= specific_scientific_signals(
+        "The \u03a9_b constraint differs from \u039bCDM when \u0394Neff is free."
+    )
 
 
 def test_temporal_pair_sourcing_requires_dates_signals_and_evidence_sections():

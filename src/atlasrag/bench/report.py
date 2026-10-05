@@ -62,9 +62,12 @@ def _exp_files(group_dir) -> dict[str, Path]:
 def build_rows(group_dir, questions) -> list[dict]:
     gold_route = {q.id: q.gold_route for q in questions}
     clusters = cluster_map(questions)
+    allowed_ids = set(gold_route)
     rows = []
     for exp, path in _exp_files(group_dir).items():
-        res = load_jsonl(path)
+        # A cleaned benchmark is a distinct population from the historical run.
+        # Do not let its report include rows for rejected questions.
+        res = [r for r in load_jsonl(path) if r.get("id") in allowed_ids]
         for qt in ("ALL",) + QTYPES:
             sub = [r for r in res if qt == "ALL" or r["qtype"] == qt]
             if not sub:
@@ -120,7 +123,12 @@ def paired_vs(group_dir, ref: str, n: int = 2000, seed: int = 0, questions=None)
     several questions come from the same paper."""
     files = _exp_files(group_dir)
     ref_key = next(k for k in files if k.startswith(ref))
-    ref_by = {r["id"]: r["evidence_recall"] for r in load_jsonl(files[ref_key])}
+    allowed_ids = {q.id for q in questions} if questions is not None else None
+    ref_by = {
+        r["id"]: r["evidence_recall"]
+        for r in load_jsonl(files[ref_key])
+        if allowed_ids is None or r.get("id") in allowed_ids
+    }
     clusters = cluster_map(questions) if questions is not None else None
     rows = []
     for k, p in files.items():

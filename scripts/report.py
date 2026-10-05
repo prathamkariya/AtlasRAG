@@ -13,12 +13,16 @@ ap.add_argument("--group", required=True)
 ap.add_argument("--compare", help="a second group (rerun) for the stability check")
 ap.add_argument("--paired-ref", help="experiment prefix to compare everything against, e.g. B")
 ap.add_argument("--file", default="data/bench/questions.jsonl")
+ap.add_argument("--out", help="write the report here; defaults to results/<group>/report.md")
 a = ap.parse_args()
 
 qs = load_questions(resolve(a.file), status="accepted")
 gdir = resolve("results") / a.group
 md = to_markdown(build_rows(gdir, qs))
-(gdir / "report.md").write_text(md, encoding="utf-8")
+out = resolve(a.out) if a.out else gdir / "report.md"
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text(md, encoding="utf-8")
+print(f"wrote {out}")
 print(md)
 if a.paired_ref:
     print(f"\nPAIRED vs {a.paired_ref}:\n" + paired_markdown(paired_vs(gdir, a.paired_ref, questions=qs)))

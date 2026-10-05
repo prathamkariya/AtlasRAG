@@ -88,6 +88,40 @@ def test_runner_resume_and_report(tmp_path):
     assert "evidence recall" in to_markdown(rows)
 
 
+def test_report_filters_result_rows_to_the_requested_benchmark_population(tmp_path):
+    out = tmp_path / "run" / "A.jsonl"
+    out.parent.mkdir()
+    rows = [
+        {"id": "keep", "qtype": "simple", "evidence_recall": 1.0,
+         "route": {"label": "SIMPLE", "source": "x"},
+         "metrics": {"latency_s": 0.1, "llm_calls": 0, "prompt_tokens": 0, "completion_tokens": 0}},
+        {"id": "removed", "qtype": "simple", "evidence_recall": 0.0,
+         "route": {"label": "SIMPLE", "source": "x"},
+         "metrics": {"latency_s": 0.1, "llm_calls": 0, "prompt_tokens": 0, "completion_tokens": 0}},
+    ]
+    out.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    q = Q(1); q.id = "keep"
+    report_row = build_rows(out.parent, [q])[0]
+    assert report_row["n"] == 1 and report_row["recall"] == 1.0
+
+
+def test_paired_report_filters_result_rows_to_the_requested_benchmark_population(tmp_path):
+    from atlasrag.bench.report import paired_vs
+
+    d = tmp_path / "run"
+    d.mkdir()
+    def row(question_id, recall):
+        return json.dumps({"id": question_id, "qtype": "simple", "evidence_recall": recall,
+                           "route": {"label": "SIMPLE", "source": "x"},
+                           "metrics": {"latency_s": 0.1, "llm_calls": 0, "prompt_tokens": 0,
+                                       "completion_tokens": 0}})
+    (d / "F.jsonl").write_text(row("keep", 1.0) + "\n" + row("removed", 0.0) + "\n")
+    (d / "A.jsonl").write_text(row("keep", 0.0) + "\n" + row("removed", 1.0) + "\n")
+    q = Q(1); q.id = "keep"
+    comparison = paired_vs(d, "F", questions=[q])
+    assert comparison[0]["n"] == 1 and comparison[0]["mean_diff"] == -1.0
+
+
 def test_bootstrap_and_stability(tmp_path):
     assert bootstrap_ci([0.5] * 10) == (0.5, 0.5, 0.5)
     assert all(math.isnan(x) for x in bootstrap_ci([]))

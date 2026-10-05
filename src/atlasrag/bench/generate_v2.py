@@ -77,6 +77,7 @@ def specific_scientific_signals(text: str) -> set[str]:
         r"\b[A-Z]{2,}[A-Za-z0-9_+\-]*\b",       # DESI, BAO, FLRW
         r"\b[A-Za-z]*\d+[A-Za-z0-9_+\-]*\b",   # H0, Neff, omega_b2
         r"\b[a-z][A-Z][A-Za-z0-9_+\-]*\b",      # mH, wCDM
+        r"[ΩΩΛΔξωλδ][A-Za-z0-9_+\-]+",              # Ωm, ΛCDM, ΔNeff
         r"[ΩΛΔξ][A-Za-z0-9_+\-]+",                # Ωm, ΛCDM, ΔNeff
     )
     return {
