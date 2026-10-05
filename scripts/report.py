@@ -21,6 +21,6 @@ md = to_markdown(build_rows(gdir, qs))
 (gdir / "report.md").write_text(md, encoding="utf-8")
 print(md)
 if a.paired_ref:
-    print(f"\nPAIRED vs {a.paired_ref}:\n" + paired_markdown(paired_vs(gdir, a.paired_ref)))
+    print(f"\nPAIRED vs {a.paired_ref}:\n" + paired_markdown(paired_vs(gdir, a.paired_ref, questions=qs)))
 if a.compare:
     print("\nSTABILITY:", json.dumps(compare_groups(gdir, resolve("results") / a.compare), indent=2))
