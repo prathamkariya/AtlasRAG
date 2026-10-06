@@ -29,12 +29,13 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--split", default="test", choices=["test", "train", "all"])
 ap.add_argument("--qtype", default="multi_hop", choices=["multi_hop", "temporal", "conflicting"])
 ap.add_argument("--chunks", default=None)
+ap.add_argument("--meta", default=None, help="metadata.jsonl with 'published' dates (default data/raw/metadata.jsonl)")
 a = ap.parse_args()
 
 path = Path(a.chunks) if a.chunks else next(p for p in (ROOT / "data/index/chunks.jsonl", ROOT / "data/processed/chunks.jsonl") if p.exists())
 chunks = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
 meta = {}
-mp = ROOT / "data/raw/metadata.jsonl"
+mp = Path(a.meta) if a.meta else ROOT / "data/raw/metadata.jsonl"
 if mp.exists():
     meta = {r["id"]: r for r in (json.loads(l) for l in open(mp, encoding="utf-8") if l.strip())}
 date = lambda pid: str(meta.get(pid, {}).get("published", ""))[:10]

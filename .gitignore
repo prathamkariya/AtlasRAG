@@ -7,8 +7,10 @@ __pycache__/
 *.log
 
 data/raw/pdf/
+data/raw_v2/pdf/
 data/retrieval/
 data/index/
+data/index_v2/
 *.npy
 
 _patch_*/
