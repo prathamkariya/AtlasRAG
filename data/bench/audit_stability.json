@@ -1,0 +1,125 @@
+{
+ "runs": 4,
+ "questions": 10,
+ "classes": {
+  "stable_fail": 4,
+  "unstable": 5,
+  "stable_pass": 1
+ },
+ "by_type": {
+  "chain": {
+   "unstable": 2
+  },
+  "multi_hop": {
+   "stable_fail": 3,
+   "unstable": 3
+  },
+  "temporal": {
+   "stable_pass": 1,
+   "stable_fail": 1
+  }
+ },
+ "pairwise_agreement": 0.75,
+ "per_question": {
+  "multi_hop-0760df1d": {
+   "verdicts": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "class": "stable_fail",
+   "type": "multi_hop"
+  },
+  "multi_hop-a55a4306": {
+   "verdicts": [
+    true,
+    true,
+    true,
+    false
+   ],
+   "class": "unstable",
+   "type": "multi_hop"
+  },
+  "multi_hop-32126f6b": {
+   "verdicts": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "class": "stable_fail",
+   "type": "multi_hop"
+  },
+  "multi_hop-3cafd9d7": {
+   "verdicts": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "class": "stable_fail",
+   "type": "multi_hop"
+  },
+  "multi_hop-3e7379ed": {
+   "verdicts": [
+    true,
+    true,
+    true,
+    false
+   ],
+   "class": "unstable",
+   "type": "multi_hop"
+  },
+  "multi_hop-c1b11062": {
+   "verdicts": [
+    true,
+    true,
+    true,
+    false
+   ],
+   "class": "unstable",
+   "type": "multi_hop"
+  },
+  "temporal-c49495fc": {
+   "verdicts": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "temporal"
+  },
+  "temporal-a8985ff7": {
+   "verdicts": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "class": "stable_fail",
+   "type": "temporal"
+  },
+  "chain-505459d1": {
+   "verdicts": [
+    false,
+    false,
+    false,
+    true
+   ],
+   "class": "unstable",
+   "type": "chain"
+  },
+  "chain-e650cfbd": {
+   "verdicts": [
+    true,
+    false,
+    false,
+    false
+   ],
+   "class": "unstable",
+   "type": "chain"
+  }
+ }
+}
