@@ -1,0 +1,61 @@
+﻿### branch anchor-fix  8f4306e
+split=test qtype=multi_hop: 32 papers, 992 long chunks, 496 possible paper pairs
+
+cross-paper chunk pairs evaluated: 470078
+   rejected  228216  no_shared_specific_signal
+   rejected   65987  no_shared_scientific_signal
+   rejected       9  not_complementary_evidence
+   PASS      175866  (37.41%)
+
+distinct PAPER PAIRS with >=1 passing chunk pair: 491 of 496
+papers involved in at least one passing pair: 32 of 32
+top paper pairs by passing chunk pairs: [(('2607.13283v1', '2609.13140v1'), 3995), (('2606.31362v2', '2607.13283v1'), 3429), (('2607.03569v1', '2607.13283v1'), 2871), (('2507.05854v2', '2607.13283v1'), 2765), (('2606.31362v2', '2609.13140v1'), 2456)]
+
+UPPER BOUND ONLY: the real generator ranks a dense+BM25 pool, a subset of these pairs, and the LLM, structural gates
+and support audit remove more. Every accepted question needs 2 papers: this is the hard ceiling on diversity.
+split=test qtype=temporal: 32 papers, 992 long chunks, 496 possible paper pairs
+
+cross-paper chunk pairs evaluated: 470078
+   rejected  228216  no_shared_specific_signal
+   rejected  138514  temporal_weak_section
+   rejected   65987  no_shared_scientific_signal
+   rejected   16734  temporal_no_update_signal
+   PASS       20627  (4.39%)
+
+distinct PAPER PAIRS with >=1 passing chunk pair: 367 of 496
+papers involved in at least one passing pair: 28 of 32
+top paper pairs by passing chunk pairs: [(('2507.05854v2', '2607.03569v1'), 617), (('2607.03569v1', '2608.20415v1'), 391), (('2507.05854v2', '2608.20415v1'), 383), (('2606.31362v2', '2607.03569v1'), 363), (('2507.05854v2', '2606.31362v2'), 353)]
+
+UPPER BOUND ONLY: the real generator ranks a dense+BM25 pool, a subset of these pairs, and the LLM, structural gates
+and support audit remove more. Every accepted question needs 2 papers: this is the hard ceiling on diversity.
+
+=== CURRENT gate (EVIDENCE_SECT whitelist)
+pairs evaluated: 3561   PASS: 1332   papers with >=1 pass: 107/119
+   rejected  2198  no_evidence_section
+   rejected    30  no_shared_scientific_signal
+   rejected     1  near_duplicate_passages
+   passes from restating sections (conclusion/summary/outlook): 311 of 1332 (23%)
+   top pass sections: [('RESULTS', 195), ('Conclusions', 101), ('DISCUSSION', 90), ('CONCLUSIONS', 80), ('RESULTS AND DISCUSSION', 75), ('METHODOLOGY', 70), ('Results', 50), ('CONCLUSION', 44)]
+   passes per paper (min/median/max): 1 9 53
+   test-split passes: 384 (papers in split: 32)
+   train-split passes: 948 (papers in split: 87)
+
+=== TIGHTEN only: current whitelist, but reject restating sections (conclusion/summary/outlook)
+pairs evaluated: 3561   PASS: 1021   papers with >=1 pass: 88/119
+   rejected  2525  no_evidence_section
+   rejected    15  no_shared_scientific_signal
+   passes from restating sections (conclusion/summary/outlook): 0 of 1021 (0%)
+   top pass sections: [('RESULTS', 195), ('DISCUSSION', 90), ('RESULTS AND DISCUSSION', 75), ('METHODOLOGY', 70), ('Results', 50), ('DATASETS AND METHODOLOGY', 29), ('DATASET', 24), ('Discussion', 23)]
+   passes per paper (min/median/max): 1 9 53
+   test-split passes: 290 (papers in split: 32)
+   train-split passes: 731 (papers in split: 87)
+
+=== BLACKLIST (diagnostic only): admit anything not obviously non-evidence, still reject conclusions
+pairs evaluated: 3561   PASS: 2645   papers with >=1 pass: 113/119
+   rejected   883  no_evidence_section
+   rejected    33  no_shared_scientific_signal
+   passes from restating sections (conclusion/summary/outlook): 0 of 2645 (0%)
+   top pass sections: [('RESULTS', 195), ('DISCUSSION', 90), ('RESULTS AND DISCUSSION', 75), ('METHODOLOGY', 70), ('Results', 50), ('DATASETS AND METHODOLOGY', 29), ('The group stage', 29), ('Models', 26)]
+   passes per paper (min/median/max): 4 20 118
+   test-split passes: 700 (papers in split: 32)
+   train-split passes: 1945 (papers in split: 87)
