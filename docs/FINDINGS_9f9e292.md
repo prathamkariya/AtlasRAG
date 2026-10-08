@@ -1,5 +1,14 @@
 # AtlasRAG audit findings (repo state 9f9e292)
 
+> **CORRECTION (after re-auditing the same questions).** Sections 2-3 below report ONE judge run. The same judge on the
+> same 27 questions, run again (`data/bench/audit.jsonl`), disagreed on 4 of them (85% raw agreement, but only 6/10 on the
+> non-simple questions). Multi-hop: 0/6 pass in the first run, 3/6 in the second. Among the 10 non-simple questions:
+> **5 fail in both runs, 1 passes in both, 4 flip.** Read "0/6 multi-hop pass" as "3 of 6 fail in both runs, 3 are unstable".
+> What still holds: on every audit-clean subset (19, 21, 18 pass-in-both, 22 pass-in-either) experiments C, E, F and G have
+> equal recall (0.82 / 0.79 / 0.83 / 0.77) and A < B = K < them, so routing's measurable value is cost only. But the 18
+> pass-in-both questions are 17 simple + 1 temporal, so this says nothing about multi-hop. A single LLM-judge run must not be
+> a keep/reject rule: use `scripts/audit_stability.py` (stable_pass / stable_fail / unstable; unstable goes to a human).
+
 Everything here was measured on the committed repo (cloned from GitHub) with no LLM calls. Reproduce with the
 scripts named in each line. "Measured" = a number from the repo's own data/code; "Hypothesis" = not yet tested.
 
