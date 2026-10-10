@@ -75,7 +75,7 @@ def specific_scientific_signals(text: str) -> set[str]:
     """Return high-precision anchors: acronyms, parameters, and model symbols."""
     patterns = (
         r"\b[A-Z]{2,}[A-Za-z0-9_+\-]*\b",       # DESI, BAO, FLRW
-        r"\b[A-Za-z]*\d+[A-Za-z0-9_+\-]*\b",   # H0, Neff, omega_b2
+        r"\b[A-Za-z]+\d+[A-Za-z0-9_+\-]*\b",   # H0, Neff, omega_b2 (>=1 leading letter: bare numbers are not anchors)
         r"\b[a-z][A-Z][A-Za-z0-9_+\-]*\b",      # mH, wCDM
         r"[ΩΛΔξ][A-Za-z0-9_+\-]+",                # Ωm, ΛCDM, ΔNeff
     )

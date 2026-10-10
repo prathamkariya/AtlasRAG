@@ -1,0 +1,23 @@
+name: tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Light dependencies only: tests use fakes, so no torch / sentence-transformers download.
+      - run: pip install numpy pyyaml python-dotenv rank-bm25 pytest openai httpx tqdm pymupdf requests arxiv
+      - run: PYTHONPATH=src python -m pytest -q
+      - name: committed corpus matches its manifest (skipped until a manifest exists)
+        run: |
+          if [ -f corpus/manifests/atlasrag-corpus-v2.json ]; then
+            ATLAS_CONFIG=configs/corpus_v2.yaml PYTHONPATH=src python scripts/make_corpus_manifest.py --verify corpus/manifests/atlasrag-corpus-v2.json
+          else
+            echo "no corpus manifest yet"
+          fi

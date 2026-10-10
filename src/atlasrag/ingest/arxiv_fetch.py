@@ -6,15 +6,23 @@ from pathlib import Path
 import requests
 
 
-def build_query(categories: list[str], keywords: list[str]) -> str:
+def build_query(categories: list[str], keywords: list[str], date_from: str | None = None,
+                date_to: str | None = None) -> str:
+    """arXiv query. Optional date_from/date_to ('YYYY-MM-DD') add a server-side submittedDate window, which is how
+    you sample across YEARS instead of only the newest papers."""
     cat_q = " OR ".join(f"cat:{c}" for c in categories)
-    if not keywords:
-        return cat_q
-    kw_q = " OR ".join(f'all:"{k}"' for k in keywords)
-    return f"({cat_q}) AND ({kw_q})"
+    q = cat_q
+    if keywords:
+        kw_q = " OR ".join(f'all:"{k}"' for k in keywords)
+        q = f"({cat_q}) AND ({kw_q})"
+    if date_from or date_to:
+        lo = (date_from or "1991-01-01").replace("-", "") + "0000"
+        hi = (date_to or "2099-12-31").replace("-", "") + "2359"
+        q = f"({q}) AND submittedDate:[{lo} TO {hi}]"
+    return q
 
 
-def fetch_papers(categories, keywords, max_papers, date_from, raw_dir, delay=3.0):
+def fetch_papers(categories, keywords, max_papers, date_from, raw_dir, delay=3.0, date_to=None, sort="date"):
     """Download metadata + PDFs. Resumable: already-downloaded papers are skipped."""
     import arxiv  # lazy import
 
@@ -29,14 +37,19 @@ def fetch_papers(categories, keywords, max_papers, date_from, raw_dir, delay=3.0
 
     client = arxiv.Client(page_size=50, delay_seconds=delay, num_retries=5)
     search = arxiv.Search(
-        query=build_query(categories, keywords),
+        query=build_query(categories, keywords, date_from, date_to),
         max_results=max_papers,
-        sort_by=arxiv.SortCriterion.SubmittedDate,
+        sort_by=arxiv.SortCriterion.SubmittedDate if sort == "date" else arxiv.SortCriterion.Relevance,
     )
     kept = 0
     for r in client.results(search):
-        if r.published.strftime("%Y-%m-%d") < date_from:
-            break
+        pub = r.published.strftime("%Y-%m-%d")
+        if pub < date_from:
+            if sort == "date":
+                break                      # newest-first: everything after this is older still
+            continue                       # relevance order is not chronological
+        if date_to and pub > date_to:
+            continue
         pid = r.get_short_id().replace("/", "_")
         if pid in seen:
             continue

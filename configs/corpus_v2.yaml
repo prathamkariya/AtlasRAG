@@ -1,0 +1,74 @@
+# Second, larger corpus. Everything except the corpus/index paths is IDENTICAL to default.yaml, so strategies,
+# models and thresholds stay comparable. Run 1 keeps using data/raw, data/processed and data/index.
+# Use it with:   $env:ATLAS_CONFIG = "configs\corpus_v2.yaml"
+corpus:
+  categories:
+  - astro-ph.CO
+  - astro-ph.GA
+  keywords:
+  - hubble tension
+  max_papers: 30
+  date_from: '2021-01-01'
+  raw_dir: data/raw_v2
+  processed_dir: data/processed_v2
+  request_delay_s: 3.0
+chunking:
+  max_chars: 1800
+  overlap_chars: 200
+  min_chars: 200
+embedding:
+  model: BAAI/bge-small-en-v1.5
+  query_prefix: 'Represent this sentence for searching relevant passages: '
+reranker:
+  model: cross-encoder/ms-marco-MiniLM-L-6-v2
+retrieval:
+  index_dir: data/index_v2
+  dense_k: 20
+  bm25_k: 20
+  rrf_k: 60
+strategies:
+  VANILLA:
+    use_hybrid: false
+    rerank: false
+    decompose: false
+    final_k: 5
+  STATIC:
+    use_hybrid: true
+    rerank: true
+    decompose: false
+    final_k: 8
+  SIMPLE:
+    use_hybrid: false
+    rerank: false
+    decompose: false
+    final_k: 5
+  MULTI_HOP:
+    use_hybrid: true
+    rerank: true
+    decompose: true
+    final_k: 8
+  UNCERTAIN:
+    use_hybrid: true
+    rerank: true
+    decompose: true
+    final_k: 10
+  STATIC_K10:
+    use_hybrid: true
+    rerank: true
+    decompose: false
+    final_k: 10
+router:
+  escalation_threshold: 0.7
+llm:
+  base_url: https://api.groq.com/openai/v1
+  api_key_env: GROQ_API_KEY
+  model: openai/gpt-oss-20b
+  reasoning_effort: low
+  token_headroom: 400
+  max_retries: 2
+  retry_base_seconds: 1.0
+  retry_max_seconds: 4.0
+  cache_dir: data/llm_cache
+  cache_namespace: default
+tracking:
+  project: atlasrag
