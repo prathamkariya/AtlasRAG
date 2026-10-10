@@ -1,0 +1,969 @@
+{
+ "corpus_id": "atlasrag-corpus-v2",
+ "created": "2026-10-10T16:02:43",
+ "git_commit": "06cfb70",
+ "n_papers": 119,
+ "n_chunks": 3905,
+ "metadata_sha256": "1b60576625a161e103b6eecd36bc8f635539a01dba8b9e53ca112a9254370f8c",
+ "chunks_sha256": "7a7babde5e98a5048a6eddd33738cd29b63a0071fe0b9b17b97bfaa4a3264d22",
+ "embedding_model": "BAAI/bge-small-en-v1.5",
+ "chunking": {
+  "max_chars": 1800,
+  "overlap_chars": 200,
+  "min_chars": 200
+ },
+ "papers": [
+  {
+   "id": "2201.04548v4",
+   "published": "2022-01-12",
+   "title": "The Ellipsoidal Universe and the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2201.04548v4",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2202.04453v2",
+   "published": "2022-02-09",
+   "title": "Analyzing the Hubble tension through hidden sector dynamics in the early universe",
+   "pdf_url": "https://arxiv.org/pdf/2202.04453v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2202.07865v1",
+   "published": "2022-02-16",
+   "title": "Exploring the Hubble Tension and Spatial Curvature from the Ages of Old Astrophysical Objects",
+   "pdf_url": "https://arxiv.org/pdf/2202.07865v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2202.10055v1",
+   "published": "2022-02-21",
+   "title": "Improved constraint on primordial gravitational waves in light of the Hubble tension and BICEP/Keck",
+   "pdf_url": "https://arxiv.org/pdf/2202.10055v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2202.12214v3",
+   "published": "2022-02-24",
+   "title": "No-go guide for late-time solutions to the Hubble tension: Matter perturbations",
+   "pdf_url": "https://arxiv.org/pdf/2202.12214v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2205.05422v2",
+   "published": "2022-05-11",
+   "title": "A void in the Hubble tension? The end of the line for the Hubble bubble",
+   "pdf_url": "https://arxiv.org/pdf/2205.05422v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2205.13514v2",
+   "published": "2022-05-26",
+   "title": "The Oscillatory Universe, phantom crossing and the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2205.13514v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2207.10570v2",
+   "published": "2022-07-21",
+   "title": "Another look on the connections of Hubble tension with the Heisenberg Uncertainty Principle",
+   "pdf_url": "https://arxiv.org/pdf/2207.10570v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2208.13999v2",
+   "published": "2022-08-30",
+   "title": "Exploiting the Einstein Telescope to solve the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2208.13999v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2210.16296v1",
+   "published": "2022-10-28",
+   "title": "Resolving the Hubble tension with Early Dark Energy",
+   "pdf_url": "https://arxiv.org/pdf/2210.16296v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2211.00578v1",
+   "published": "2022-11-01",
+   "title": "Investigating the Hubble Tension: Effect of Cepheid Calibration",
+   "pdf_url": "https://arxiv.org/pdf/2211.00578v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2211.03236v3",
+   "published": "2022-11-06",
+   "title": "Mirror Dark Sector Solution of the Hubble Tension with Time-varying Fine-structure Constant",
+   "pdf_url": "https://arxiv.org/pdf/2211.03236v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2211.16394v3",
+   "published": "2022-11-29",
+   "title": "The Hubble tension from the standpoint of quantum cosmology",
+   "pdf_url": "https://arxiv.org/pdf/2211.16394v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2211.16979v2",
+   "published": "2022-11-30",
+   "title": "Using simulated Tianqin gravitational wave data and electromagnetic wave data to study the coincidence problem and Hubble tension problem",
+   "pdf_url": "https://arxiv.org/pdf/2211.16979v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2212.04494v2",
+   "published": "2022-12-08",
+   "title": "What it takes to solve the Hubble tension through modifications of cosmological recombination",
+   "pdf_url": "https://arxiv.org/pdf/2212.04494v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2301.06140v1",
+   "published": "2023-01-15",
+   "title": "Investigating The Hubble Tension Through Hubble Parameter Data",
+   "pdf_url": "https://arxiv.org/pdf/2301.06140v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2301.09382v2",
+   "published": "2023-01-23",
+   "title": "Towards a possible solution to the Hubble tension with Horndeski gravity",
+   "pdf_url": "https://arxiv.org/pdf/2301.09382v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2301.10861v1",
+   "published": "2023-01-25",
+   "title": "Hubble Tension and Gravitational Self-Interaction",
+   "pdf_url": "https://arxiv.org/pdf/2301.10861v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2302.09091v1",
+   "published": "2023-02-17",
+   "title": "Neutrino-Assisted Early Dark Energy is a Natural Resolution of the Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2302.09091v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2303.02953v2",
+   "published": "2023-03-06",
+   "title": "A possible solution to the Hubble tension from quantum gravity",
+   "pdf_url": "https://arxiv.org/pdf/2303.02953v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2303.12345v2",
+   "published": "2023-03-22",
+   "title": "Impact of the Hubble tension on the $r$-$n_s$ contour",
+   "pdf_url": "https://arxiv.org/pdf/2303.12345v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2306.11101v2",
+   "published": "2023-06-19",
+   "title": "Metric $f(R)$ gravity with dynamical dark energy as a scenario for the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2306.11101v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2307.00418v1",
+   "published": "2023-07-01",
+   "title": "Decaying Dark Matter and the Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2307.00418v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2307.01662v1",
+   "published": "2023-07-04",
+   "title": "Improving Constraints on Models Addressing the Hubble Tension with CMB Delensing",
+   "pdf_url": "https://arxiv.org/pdf/2307.01662v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2307.05475v1",
+   "published": "2023-07-11",
+   "title": "Primordial magnetic fields and the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2307.05475v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2307.09863v3",
+   "published": "2023-07-19",
+   "title": "Testing the coupling of dark radiations in light of the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2307.09863v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2310.16800v2",
+   "published": "2023-10-25",
+   "title": "Can acoustic and axion-like early dark energy still resolve the Hubble tension?",
+   "pdf_url": "https://arxiv.org/pdf/2310.16800v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2311.07552v4",
+   "published": "2023-11-13",
+   "title": "The Unsettled Number: Hubble's Tension",
+   "pdf_url": "https://arxiv.org/pdf/2311.07552v4",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2311.16862v1",
+   "published": "2023-11-28",
+   "title": "Solving the Hubble tension at intermediate redshifts with dynamical dark energy",
+   "pdf_url": "https://arxiv.org/pdf/2311.16862v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2312.12408v2",
+   "published": "2023-12-19",
+   "title": "Hubble tension as a window on the gravitation of the dark matter sector: Exploration of a family of models",
+   "pdf_url": "https://arxiv.org/pdf/2312.12408v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2403.18968v1",
+   "published": "2024-03-27",
+   "title": "Oscillating dark energy in light of the latest observations and its impact on the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2403.18968v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2403.19957v1",
+   "published": "2024-03-29",
+   "title": "Stupendously Large Black Hole Coalescence and Hubble Tensions",
+   "pdf_url": "https://arxiv.org/pdf/2403.19957v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2404.08586v3",
+   "published": "2024-04-12",
+   "title": "A Radical Solution to the Hubble Tension Problem",
+   "pdf_url": "https://arxiv.org/pdf/2404.08586v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2404.18579v2",
+   "published": "2024-04-29",
+   "title": "Dark energy in light of recent DESI BAO and Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2404.18579v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2405.03627v1",
+   "published": "2024-05-06",
+   "title": "Investigating the Hubble Tension and $σ_8$ Discrepancy in f(Q) Cosmology",
+   "pdf_url": "https://arxiv.org/pdf/2405.03627v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2405.07039v2",
+   "published": "2024-05-11",
+   "title": "Hubble tension tomography: BAO vs SnIa distance tension",
+   "pdf_url": "https://arxiv.org/pdf/2405.07039v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2405.12268v1",
+   "published": "2024-05-20",
+   "title": "Axion baryogenesis puts a new spin on the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2405.12268v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2405.17212v3",
+   "published": "2024-05-27",
+   "title": "A new parametrization of Hubble function and Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2405.17212v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2407.01961v1",
+   "published": "2024-07-02",
+   "title": "Extended Uncertainty Principle: A Deeper Insight into the Hubble Tension?",
+   "pdf_url": "https://arxiv.org/pdf/2407.01961v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2407.04322v3",
+   "published": "2024-07-05",
+   "title": "2D BAO vs 3D BAO: solving the Hubble tension with an alternative cosmological model",
+   "pdf_url": "https://arxiv.org/pdf/2407.04322v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2408.04354v1",
+   "published": "2024-08-08",
+   "title": "Exploring the Hubble tension with a late time Modified Gravity scenario",
+   "pdf_url": "https://arxiv.org/pdf/2408.04354v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2408.04530v3",
+   "published": "2024-08-08",
+   "title": "Multidimensionality of the Hubble tension: the roles of $Ω_m$ and $ω_c$",
+   "pdf_url": "https://arxiv.org/pdf/2408.04530v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2409.15513v1",
+   "published": "2024-09-23",
+   "title": "The Hubble Tension: Relativistic Dark Matter Production from Long-lived Particles",
+   "pdf_url": "https://arxiv.org/pdf/2409.15513v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2409.17879v1",
+   "published": "2024-09-26",
+   "title": "Towards primordial gravitational waves and $n_s=1$ in light of BICEP/Keck, DESI BAO and Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2409.17879v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2410.06053v3",
+   "published": "2024-10-08",
+   "title": "Narrowing down the Hubble tension to the first two rungs of distance ladders",
+   "pdf_url": "https://arxiv.org/pdf/2410.06053v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2410.06450v1",
+   "published": "2024-10-09",
+   "title": "Hints of new physics for the Hubble tension: violation of cosmological principle",
+   "pdf_url": "https://arxiv.org/pdf/2410.06450v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2410.21925v3",
+   "published": "2024-10-29",
+   "title": "Redshift-space distortion constraints on the neutrino mass and models to alleviate the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2410.21925v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2411.15301v4",
+   "published": "2024-11-22",
+   "title": "Challenges to a sharp change in $G$ as a solution to the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2411.15301v4",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2411.16678v2",
+   "published": "2024-11-25",
+   "title": "Modified recombination and the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2411.16678v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2412.12245v2",
+   "published": "2024-12-16",
+   "title": "The redshift dependence of the inferred $H_0$ in a local void solution to the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2412.12245v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2501.09598v2",
+   "published": "2025-01-16",
+   "title": "Cosmic voids and the kinetic analysis. IV. Hubble tension and the cosmological constant",
+   "pdf_url": "https://arxiv.org/pdf/2501.09598v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2501.13153v1",
+   "published": "2025-01-22",
+   "title": "Neutrinophilic $\\mathbfΛ$CDM Extension for EMPRESS, DESI and Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2501.13153v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2502.11568v1",
+   "published": "2025-02-17",
+   "title": "A solution to the Hubble tension with self-interacting ultralight dark matter",
+   "pdf_url": "https://arxiv.org/pdf/2502.11568v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2503.00682v3",
+   "published": "2025-03-02",
+   "title": "Black hole information turbulence and the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2503.00682v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2503.21600v2",
+   "published": "2025-03-27",
+   "title": "The Impact of the Hubble Tension on the Evidence for Dynamical Dark Energy",
+   "pdf_url": "https://arxiv.org/pdf/2503.21600v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2504.06831v4",
+   "published": "2025-04-09",
+   "title": "Hubble tension and small-scale inhomogeneities on light propagation",
+   "pdf_url": "https://arxiv.org/pdf/2504.06831v4",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2504.07966v2",
+   "published": "2025-04-10",
+   "title": "What it takes to solve the Hubble tension through scale-dependent modifications of the primordial power spectrum",
+   "pdf_url": "https://arxiv.org/pdf/2504.07966v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2504.13380v3",
+   "published": "2025-04-18",
+   "title": "Alleviating the Hubble Tension with a Local Void and Transitions of the Absolute Magnitude",
+   "pdf_url": "https://arxiv.org/pdf/2504.13380v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2505.24743v2",
+   "published": "2025-05-30",
+   "title": "What solves the Hubble tension in phenomenological dark energy models at background level?",
+   "pdf_url": "https://arxiv.org/pdf/2505.24743v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2506.10518v2",
+   "published": "2025-06-12",
+   "title": "Testing the local supervoid solution to the Hubble tension with direct distance tracers",
+   "pdf_url": "https://arxiv.org/pdf/2506.10518v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2506.23556v1",
+   "published": "2025-06-30",
+   "title": "What Prevents Resolving the Hubble Tension through Late-Time Expansion Modifications?",
+   "pdf_url": "https://arxiv.org/pdf/2506.23556v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2507.03743v3",
+   "published": "2025-07-04",
+   "title": "Bimetric gravity improves the fit to DESI BAO and eases the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2507.03743v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2507.05854v2",
+   "published": "2025-07-08",
+   "title": "Addressing the Hubble Tension: Insights from Reversible and Irreversible Thermodynamic Processes",
+   "pdf_url": "https://arxiv.org/pdf/2507.05854v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2507.15273v1",
+   "published": "2025-07-21",
+   "title": "Dark energy era with a resolution of Hubble tension in generalized entropic cosmology",
+   "pdf_url": "https://arxiv.org/pdf/2507.15273v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2508.05389v1",
+   "published": "2025-08-07",
+   "title": "Constraints on transition redshift utilizing the latest H(z) measurements and comments on the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2508.05389v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2509.09034v1",
+   "published": "2025-09-10",
+   "title": "On the True Significance of the Hubble Tension: A Bayesian Error Decomposition Accounting for Information Loss",
+   "pdf_url": "https://arxiv.org/pdf/2509.09034v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2509.22306v1",
+   "published": "2025-09-26",
+   "title": "Coupled non-canonical scalar field to neutrinos could alleviate the Hubble tension and cross the phantom barrier",
+   "pdf_url": "https://arxiv.org/pdf/2509.22306v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2510.01974v2",
+   "published": "2025-10-02",
+   "title": "BAO miscalibration cannot rescue late-time solutions to the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2510.01974v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2510.19069v1",
+   "published": "2025-10-21",
+   "title": "Hubble tension in an anisotropic Universe",
+   "pdf_url": "https://arxiv.org/pdf/2510.19069v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2511.09467v2",
+   "published": "2025-11-12",
+   "title": "Revisiting the Hubble tension problem in the framework of holographic dark energy",
+   "pdf_url": "https://arxiv.org/pdf/2511.09467v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2511.14332v2",
+   "published": "2025-11-18",
+   "title": "On the impact of the supernova subsamples in reducing the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2511.14332v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2511.16554v1",
+   "published": "2025-11-20",
+   "title": "Dark Matter-Dark Radiation Interactions and the Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2511.16554v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2512.12697v2",
+   "published": "2025-12-14",
+   "title": "A parameterized equation of state for dark energy and Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2512.12697v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2512.14814v1",
+   "published": "2025-12-16",
+   "title": "Constraining Fifth Forces using the Local Distance Ladder: Implications for the Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2512.14814v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2601.00650v2",
+   "published": "2026-01-02",
+   "title": "Dissecting the Hubble tension: Insights from a diverse set of Sound Horizon-free H0 measurements",
+   "pdf_url": "https://arxiv.org/pdf/2601.00650v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2601.22043v1",
+   "published": "2026-01-29",
+   "title": "A null test of the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2601.22043v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2601.22215v1",
+   "published": "2026-01-29",
+   "title": "Physically-motivated priors in the local distance ladder significantly reduce the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2601.22215v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2602.08522v2",
+   "published": "2026-02-09",
+   "title": "Thermal Vacuum Cosmology Explains Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2602.08522v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2602.13189v2",
+   "published": "2026-02-13",
+   "title": "Addressing the Hubble tension with Sterile Neutrino Dark Matter",
+   "pdf_url": "https://arxiv.org/pdf/2602.13189v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2602.23895v1",
+   "published": "2026-02-27",
+   "title": "Dark Acoustic Oscillations and the Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2602.23895v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2604.05095v2",
+   "published": "2026-04-06",
+   "title": "A generic $ω_b$ tension in early-time solutions to the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2604.05095v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2604.25813v1",
+   "published": "2026-04-28",
+   "title": "Geometric Constraints on the Pre-Recombination Expansion History from the Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2604.25813v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2604.26541v1",
+   "published": "2026-04-29",
+   "title": "The End of the First Act: Spectral Running, Interacting Dark Radiation, and the Hubble Tension in Light of ACT DR6 Data",
+   "pdf_url": "https://arxiv.org/pdf/2604.26541v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2606.06495v1",
+   "published": "2026-06-04",
+   "title": "What it takes to solve the Hubble tension through Modifications of Cosmological Recombination II: in light of ACT DR6 and DESI DR2",
+   "pdf_url": "https://arxiv.org/pdf/2606.06495v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2606.12980v1",
+   "published": "2026-06-11",
+   "title": "A Review on Resolving the Hubble Tension via Late-Universe Physics",
+   "pdf_url": "https://arxiv.org/pdf/2606.12980v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2606.17749v1",
+   "published": "2026-06-16",
+   "title": "Alleviating the Hubble tension with the $Λ_{ω_s}$CDM model",
+   "pdf_url": "https://arxiv.org/pdf/2606.17749v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2606.20434v2",
+   "published": "2026-06-18",
+   "title": "The Hubble tension: A decade review",
+   "pdf_url": "https://arxiv.org/pdf/2606.20434v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2606.31362v2",
+   "published": "2026-06-30",
+   "title": "Running into tension: primordial black holes from ultra-slow-roll inflation, spectral running, and the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2606.31362v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.03569v1",
+   "published": "2026-07-03",
+   "title": "Hubble tension in k-essence: Evidence for robust tension alleviation",
+   "pdf_url": "https://arxiv.org/pdf/2607.03569v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.13283v1",
+   "published": "2026-07-14",
+   "title": "The $H_0$ world cup. II. A comprehensive competition between proposed Hubble tension solutions",
+   "pdf_url": "https://arxiv.org/pdf/2607.13283v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.18521v1",
+   "published": "2026-07-20",
+   "title": "Modified Cosmology from Mass-to-Horizon Relation: Observational Bounds",
+   "pdf_url": "https://arxiv.org/pdf/2607.18521v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.18528v1",
+   "published": "2026-07-20",
+   "title": "The impact of Hawking radiation from primordial black holes on recombination and the Hubble tension",
+   "pdf_url": "https://arxiv.org/pdf/2607.18528v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.20257v1",
+   "published": "2026-07-22",
+   "title": "Can cosmic voids ease the Hubble tension? Local expansion in $w_0w_a$CDM",
+   "pdf_url": "https://arxiv.org/pdf/2607.20257v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.20413v1",
+   "published": "2026-07-22",
+   "title": "The road towards precision measurements of $H_0$ with bright sirens in the Einstein Telescope era",
+   "pdf_url": "https://arxiv.org/pdf/2607.20413v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.20635v1",
+   "published": "2026-07-22",
+   "title": "What could an emerging Big Bang Nucleosynthesis discrepancy be hinting at?",
+   "pdf_url": "https://arxiv.org/pdf/2607.20635v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.21244v2",
+   "published": "2026-07-23",
+   "title": "Hubble tension: the shape wall",
+   "pdf_url": "https://arxiv.org/pdf/2607.21244v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.21497v2",
+   "published": "2026-07-23",
+   "title": "Hubble tension: a short review of theoretical explanations",
+   "pdf_url": "https://arxiv.org/pdf/2607.21497v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.24443v2",
+   "published": "2026-07-27",
+   "title": "Updated 1.1% Precision Values of the Hubble Constant with Corrected Pantheon+ and Dark Energy Survey (DES)-DOVEKIE Type Ia Supernovae",
+   "pdf_url": "https://arxiv.org/pdf/2607.24443v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.26101v1",
+   "published": "2026-07-28",
+   "title": "Early- and late-time constraints on Wald-Gauss-Bonnet topological dark energy and implications for the $H_0$ and $S_8$ tensions",
+   "pdf_url": "https://arxiv.org/pdf/2607.26101v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.26105v1",
+   "published": "2026-07-28",
+   "title": "Cosmological consequences of scale-dependent Barrow-Tsallis entropy",
+   "pdf_url": "https://arxiv.org/pdf/2607.26105v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.27515v1",
+   "published": "2026-07-29",
+   "title": "Unified dark sector approaches to cosmological tensions",
+   "pdf_url": "https://arxiv.org/pdf/2607.27515v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2607.29197v1",
+   "published": "2026-07-31",
+   "title": "A Quantitative Framework for Testing the Hubble Tension in a Bianchi Type I Cosmological Background",
+   "pdf_url": "https://arxiv.org/pdf/2607.29197v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.06247v4",
+   "published": "2026-08-06",
+   "title": "A low value of $H_0$ in tension with the distance ladder from Megamasers using peculiar velocity reconstruction",
+   "pdf_url": "https://arxiv.org/pdf/2608.06247v4",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.07470v3",
+   "published": "2026-08-07",
+   "title": "HST imaging, pipeline modeling, and time-delay predictions of 2 triply-imaged and 15 quadruply-imaged lensed quasars",
+   "pdf_url": "https://arxiv.org/pdf/2608.07470v3",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.07654v1",
+   "published": "2026-08-07",
+   "title": "Deus ex $H_0$ -- Is evidence for dynamical dark energy conditioned on early cosmology?",
+   "pdf_url": "https://arxiv.org/pdf/2608.07654v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.17212v1",
+   "published": "2026-08-17",
+   "title": "Investigating The Effects of Early Dark Energy on Large-scale Structure Within the EDENS Suite",
+   "pdf_url": "https://arxiv.org/pdf/2608.17212v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.20415v1",
+   "published": "2026-08-17",
+   "title": "A comparative study of emergent dark energy models",
+   "pdf_url": "https://arxiv.org/pdf/2608.20415v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.26507v2",
+   "published": "2026-08-27",
+   "title": "Revisiting the Hubble tension with an inverse power-law early dark energy",
+   "pdf_url": "https://arxiv.org/pdf/2608.26507v2",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.28260v1",
+   "published": "2026-08-28",
+   "title": "Guide for the Hubble Tension: Mid-Time Solutions and Generalized PAge Parameterizations",
+   "pdf_url": "https://arxiv.org/pdf/2608.28260v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2608.30599v1",
+   "published": "2026-08-31",
+   "title": "Not all those missing are lost: leveraging galaxy clustering in incomplete catalogs to unleash dark sirens cosmology",
+   "pdf_url": "https://arxiv.org/pdf/2608.30599v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.12053v1",
+   "published": "2026-09-10",
+   "title": "Reconsidering the role of bright and dark gravitational-wave standard sirens for cosmology",
+   "pdf_url": "https://arxiv.org/pdf/2609.12053v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.13140v1",
+   "published": "2026-09-11",
+   "title": "Big Bang For Your Helium Buck",
+   "pdf_url": "https://arxiv.org/pdf/2609.13140v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.13266v1",
+   "published": "2026-09-07",
+   "title": "Black Holes, Gravitational Waves and Space-Time Singularities Lemaitre Conference 2024",
+   "pdf_url": "https://arxiv.org/pdf/2609.13266v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.16120v1",
+   "published": "2026-09-14",
+   "title": "Dark Radiation Sticks Together: Dark QCD and the Hubble Tension",
+   "pdf_url": "https://arxiv.org/pdf/2609.16120v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.16961v1",
+   "published": "2026-09-15",
+   "title": "Limits on the Inferred Hubble Constant Bias from a Local McVittie Gravitational Field",
+   "pdf_url": "https://arxiv.org/pdf/2609.16961v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.17684v1",
+   "published": "2026-09-15",
+   "title": "A reanalysis of the megamaser Hubble constant: from spot catalogues to peculiar velocities",
+   "pdf_url": "https://arxiv.org/pdf/2609.17684v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.25412v1",
+   "published": "2026-09-21",
+   "title": "CHASE Spectral Survey I: Measuring Contamination in the Color-selected J-region Asymptotic Giant Branch Distance Indicator",
+   "pdf_url": "https://arxiv.org/pdf/2609.25412v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.29996v1",
+   "published": "2026-09-24",
+   "title": "Two-rung ladder: $H_0$ from Tip of the Red Giant Branch and geometric anchors alone",
+   "pdf_url": "https://arxiv.org/pdf/2609.29996v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  },
+  {
+   "id": "2609.31543v1",
+   "published": "2026-09-25",
+   "title": "Cosmic Heterogeneity Shapes the Evolution of Dark Energy and Time",
+   "pdf_url": "https://arxiv.org/pdf/2609.31543v1",
+   "pdf_sha256": null,
+   "pdf_bytes": null
+  }
+ ]
+}
