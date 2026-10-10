@@ -6,12 +6,17 @@ __pycache__/
 *.bak
 *.log
 
-data/raw/pdf/
-data/raw_v2/pdf/
+# PDFs, indexes and embeddings are rebuilt from metadata.jsonl / chunks.jsonl (see scripts/refetch_pdfs.py,
+# scripts/rebuild_index_from_chunks.py); they never go in Git.
+data/raw*/pdf/
 data/retrieval/
-data/index/
-data/index_v2/
+data/index*/
 *.npy
+# LLM cache: only the Run 1 namespace is tracked (reproducibility of Run 1); new namespaces stay local.
+data/llm_cache/*
+!data/llm_cache/default/
+*.patch
+audit_*view*.txt
 
 _patch_*/
 *.zip
@@ -21,4 +26,3 @@ data/bench/*pilot*.jsonl
 .vscode/
 audit_report.txt
 sections.csv
-docs/
