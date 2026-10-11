@@ -73,3 +73,14 @@ def collect(questions, rep_files, extra_runs=()) -> dict:
 def write_report(path, summary: dict) -> None:
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(summary, indent=1), encoding="utf-8")
+
+
+def validation_run(questions) -> dict:
+    """The generation-time audit verdict stored in each question's `validation` JSON, as one more judge run."""
+    out = {}
+    for q in questions:
+        try:
+            out[q.id] = bool(json.loads(q.validation)["ok"])
+        except Exception:
+            pass
+    return out

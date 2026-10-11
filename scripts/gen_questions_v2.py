@@ -21,7 +21,8 @@ ap.add_argument("--split", choices=["test", "train"], default="test")
 ap.add_argument("--per-type", type=int, default=20)
 ap.add_argument("--types", nargs="*", default=["simple", "multi_hop", "chain"])
 ap.add_argument("--attempts", type=int, default=6)
-ap.add_argument("--model"); ap.add_argument("--seed", type=int, default=1)
+ap.add_argument("--model", help="generation model"); ap.add_argument("--seed", type=int, default=1)
+ap.add_argument("--judge-model", help="support-audit model; use a DIFFERENT one than --model")
 ap.add_argument("--out", default="data/bench/questions_v2.jsonl")
 ap.add_argument("--summary", help="run-summary JSONL (default: <out>.runs.jsonl)")
 a = ap.parse_args()
@@ -39,7 +40,7 @@ summary_path = Path(a.summary) if a.summary else out.with_suffix(".runs.jsonl")
 existing = load_questions(out); seen = {q.id for q in existing}
 llm = LLMClient(cfg["llm"], cache_root=resolve(cfg["llm"]["cache_dir"]))
 gen = ValidatedGenerator(Index.load(resolve(cfg["retrieval"]["index_dir"])), llm,
-                         load_meta(resolve(cfg["corpus"]["raw_dir"])), seed=a.seed, model=a.model)
+                         load_meta(resolve(cfg["corpus"]["raw_dir"])), seed=a.seed, model=a.model, judge_model=a.judge_model)
 
 per_type, stopped, t0, error = {}, None, time.time(), None
 try:
@@ -68,7 +69,7 @@ except BaseException as e:                     # still record what happened (Ctr
     raise
 finally:
     record = {"finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "elapsed_s": round(time.time() - t0, 1),
-              "git_commit": git_commit(), "model": a.model or cfg["llm"]["model"], "args": vars(a),
+              "git_commit": git_commit(), "model": a.model or cfg["llm"]["model"], "judge_model": a.judge_model or a.model or cfg["llm"]["model"], "args": vars(a),
               "per_type": per_type, "stopped": stopped, "error": error,
               "outcomes": dict(gen.vstats), "llm": dict(llm.stats)}
     summary_path.parent.mkdir(parents=True, exist_ok=True)

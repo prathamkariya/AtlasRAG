@@ -169,8 +169,10 @@ def _parse_structured(text: str):
 
 
 class ValidatedGenerator(Generator):
-    def __init__(self, *a, **k):
+    def __init__(self, *a, judge_model=None, **k):
         super().__init__(*a, **k)
+        # A judge that is a DIFFERENT model than the generator avoids self-agreement bias (and, on Groq, a separate token bucket).
+        self.judge_model = judge_model
         self.text_of = {c["chunk_id"]: c["text"] for c in self.ix.chunks}
         self.vstats: Counter = Counter()
 
@@ -291,7 +293,7 @@ class ValidatedGenerator(Generator):
 
     def _judge(self, question: str, reference: str, passages: list[str]):
         try:
-            return judge_support(self.llm, question, reference, passages, model=self.model)
+            return judge_support(self.llm, question, reference, passages, model=self.judge_model or self.model)
         except LLMRateLimitExceeded:
             self.vstats["rate_limited"] += 1
             return None
@@ -336,7 +338,8 @@ class ValidatedGenerator(Generator):
             if validation is None:
                 return None
             ok, reasons = verdict(validation, qtype)
-            payload = {"ok": ok, "reasons": reasons, "verdict": validation}
+            payload = {"ok": ok, "reasons": reasons, "verdict": validation,
+                       "judge_model": self.judge_model or self.model or "config-default", "generator_model": self.model or "config-default"}
             q = self._build(qtype, question, ref, idxs, ch, split, payload)
             if not ok:
                 for r in reasons: self.vstats[r] += 1

@@ -14,10 +14,11 @@ ap.add_argument("--file", default="data/bench/questions.jsonl")
 ap.add_argument("--ids", nargs="*", default=[])
 ap.add_argument("--unstable", action="store_true", help="show the questions classed 'unstable' in audit_stability.json")
 ap.add_argument("--max-chars", type=int, default=1400)
+ap.add_argument("--stability", default="data/bench/audit_stability.json", help="stability JSON to read verdict history from")
 a = ap.parse_args()
 
 ids = list(a.ids)
-stab = resolve("data/bench/audit_stability.json")
+stab = resolve(a.stability)
 history = json.loads(stab.read_text(encoding="utf-8"))["per_question"] if stab.exists() else {}
 if a.unstable:
     ids += [q for q, d in history.items() if d["class"] == "unstable"]
