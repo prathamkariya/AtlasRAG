@@ -10,6 +10,7 @@ sys.path.insert(0,str(ROOT/"src"))
 
 from atlasrag.config import load_config,resolve
 from atlasrag.bench.schema import load_questions,save_questions
+from atlasrag.bench.review_meta import mark_review
 
 ap=argparse.ArgumentParser()
 ap.add_argument("--file",default="data/bench/questions.jsonl")
@@ -91,8 +92,10 @@ if a.apply:
     for i,k in enumerate(decisions):
         if k=="a":
             todo[i].status="accepted"
+            mark_review(todo[i],"llm_assisted")      # these letters came from another model, not from you
         elif k=="r":
             todo[i].status="rejected"
+            mark_review(todo[i],"llm_assisted")
         else:
             print(
                 f"Error: invalid decision '{k}' at position {i+1}. "
@@ -123,10 +126,12 @@ for n,q in enumerate(todo,1):
 
         if k=="a":
             q.status="accepted"
+            mark_review(q,"human")
             break
 
         if k=="r":
             q.status="rejected"
+            mark_review(q,"human")
             break
 
         if k=="e":

@@ -15,7 +15,7 @@ from tqdm import tqdm
 from atlasrag.config import load_config, resolve
 from atlasrag.llm import LLMClient
 from atlasrag.bench.schema import load_questions
-from atlasrag.bench.audit_stability import run_stability, collect, summarize, write_report
+from atlasrag.bench.audit_stability import run_stability, collect, summarize, write_report, validation_run
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--file", default="data/bench/questions.jsonl")
@@ -26,6 +26,11 @@ ap.add_argument("--model"); ap.add_argument("--wait-on-rate-limit", action="stor
 ap.add_argument("--out-dir", default="data/bench")
 ap.add_argument("--baseline", default="data/bench/audit.jsonl")
 ap.add_argument("--manifest", default="data/bench/v2_review_manifest.json")
+ap.add_argument("--no-baseline", action="store_true",
+                help="do NOT mix in audit.jsonl / the manifest. Required for NEW question files: those ids are not in the old runs, "
+                     "and a question missing from any run is dropped from the comparison")
+ap.add_argument("--include-validation", action="store_true",
+                help="count each question's generation-time audit verdict (its `validation` field) as one more run")
 a = ap.parse_args()
 
 cfg = load_config()
@@ -46,11 +51,17 @@ res = run_stability(make_llm, qs, text_of, out_dir, a.reps, a.model, a.wait_on_r
                     progress=lambda x: tqdm(x, desc="judge"))
 extra = []
 bp = resolve(a.baseline)
-if bp.exists():
+if a.no_baseline:
+    pass
+elif bp.exists():
     extra.append({json.loads(l)["id"]: json.loads(l)["ok"] for l in open(bp, encoding="utf-8") if l.strip()})
 mp = resolve(a.manifest)
-if mp.exists():
+if a.no_baseline:
+    pass
+elif mp.exists():
     extra.append({r["id"]: r["audit_ok"] for r in json.load(open(mp, encoding="utf-8"))})
+if a.include_validation:
+    extra.append(validation_run(qs))
 verdicts = collect(qs, [out_dir / f"audit_stability_r{k}.jsonl" for k in range(1, a.reps + 1)], extra)
 summary = summarize(verdicts, {q.id: q.qtype for q in qs})
 write_report(out_dir / "audit_stability.json", summary)
