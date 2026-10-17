@@ -427,5 +427,8 @@ class ValidatedGenerator(Generator):
             split=split,
             status="candidate",
         )
+        # provenance for EVERY question type (the structured path builds its own payload and used to omit it)
+        payload.setdefault("judge_model", self.judge_model or self.model or "config-default")
+        payload.setdefault("generator_model", self.model or "config-default")
         q.validation = json.dumps(payload)
         return q

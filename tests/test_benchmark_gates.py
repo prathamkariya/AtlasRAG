@@ -141,3 +141,87 @@ def test_pilot_yield_summary(tmp_path):
     empty = tmp_path / "e.jsonl"; empty.write_text("")
     with pytest.raises(ValueError):
         load_last_run(empty)
+
+
+# ---------- regression tests for the bugs the first pilot exposed ----------
+def _gen_index(papers=40):
+    from atlasrag.retrieval.index import Index
+    chunks = []
+    for i in range(papers):
+        # a shared core (same topic and anchors) plus vocabulary unique to each paper: related but complementary, not duplicates
+        chunks.append({"chunk_id": f"p{i}::0", "paper_id": f"p{i}", "title": "T", "section": "Abstract",
+                       "text": f"Hubble tension CMB LCDM H0 measurement abstract{i}alpha abstract{i}beta abstract{i}gamma " * 20})
+        chunks.append({"chunk_id": f"p{i}::1", "paper_id": f"p{i}", "title": "T", "section": "Results",
+                       "text": f"Hubble tension CMB LCDM H0 BAO DESI constraints results{i}delta results{i}epsilon results{i}zeta " * 15})
+    return Index(chunks, np.random.RandomState(0).rand(len(chunks), 8).astype("float32"))
+
+
+class _JsonLLM:
+    def chat(self, messages, **kw):
+        if "audit evaluation questions" in messages[0]["content"]:
+            # the REAL judge prompt requires the two contribution fields and joint_reason for every non-simple type
+            return json.dumps({"answer_supported": True, "needs_all_passages": True, "quantities_comparable": None,
+                               "same_quantity": True, "passage_1_contribution": "A gives X", "passage_2_contribution": "B gives Y",
+                               "joint_reason": "the answer combines X and Y"})
+        return json.dumps({"question": "How do the two measurements of the expansion rate compare overall?",
+                           "reference_answer": "They differ.", "passage_1_contribution": "fact from A",
+                           "passage_2_contribution": "fact from B", "joint_reason": "both are needed", "same_quantity": True})
+
+
+def test_every_question_type_records_generator_and_judge_models():
+    """The first version recorded provenance only on the 'simple' path, so finalize rejected all structured questions."""
+    from atlasrag.bench.generate_v2 import ValidatedGenerator
+    g = ValidatedGenerator(_gen_index(), _JsonLLM(), {}, seed=1, model="gen-model", judge_model="judge-model")
+    saved = {}
+    for qt in ("simple", "multi_hop", "chain"):
+        for _ in range(40):
+            q = g.make(qt, "test")
+            if q:
+                saved[qt] = q
+                break
+    assert set(saved) >= {"simple", "multi_hop"}, f"generator produced no survivors for: {set(['simple','multi_hop','chain']) - set(saved)}"
+    for qt, q in saved.items():
+        v = json.loads(q.validation)
+        assert v["judge_model"] == "judge-model" and v["generator_model"] == "gen-model", qt
+        mark_review(q, "human")
+        st = {q.id: {"verdicts": [True, True, True], "class": "stable_pass"}}
+        assert "no_judge_model_recorded" not in gate_reasons(q, st), qt
+
+
+def test_judge_defaults_to_the_generator_model_when_not_separate():
+    from atlasrag.bench.generate_v2 import ValidatedGenerator
+    g = ValidatedGenerator(_gen_index(), _JsonLLM(), {}, seed=1, model="only-model")
+    q = next(x for x in (g.make("simple", "test") for _ in range(30)) if x)
+    assert json.loads(q.validation)["judge_model"] == "only-model"
+
+
+def test_pilot_summary_is_correct_after_resumes(tmp_path):
+    from atlasrag.bench.pilot_yield import summarize_pilot, count_prior_runs
+    runs = [{"llm": {"provider_prompt_tokens": 100, "provider_completion_tokens": 50, "provider_calls": 5, "cache_hits": 0,
+                     "rate_limit_errors": 2}, "stopped": {"reason": "rate_limited"}, "model": "g", "judge_model": "j"},
+            {"llm": {"provider_prompt_tokens": 60, "provider_completion_tokens": 40, "provider_calls": 3, "cache_hits": 9,
+                     "rate_limit_errors": 0}, "stopped": None, "model": "g", "judge_model": "j"}]
+    qs = [{"qtype": "simple", "gold_paper_ids": ["a"], "validation": json.dumps({"judge_model": "j"})},
+          {"qtype": "chain", "gold_paper_ids": ["b"], "validation": ""},                            # no provenance
+          {"qtype": "chain", "gold_paper_ids": ["b", "c"], "validation": "{not json"}]
+    s = summarize_pilot(runs, qs)
+    assert s["runs"] == 2 and s["provider_tokens_total"] == 250 and s["tokens_per_saved_candidate"] == 83
+    assert s["saved_per_type"] == {"simple": 1, "chain": 2} and s["distinct_gold_papers"] == 3
+    assert s["runs_stopped_by_rate_limit"] == 1 and s["cache_hits_total"] == 9 and s["rate_limit_errors_total"] == 2
+    assert s["saved_without_judge_model"] == 2 and s["share_of_one_200k_daily_budget"] == 0.001
+    f = tmp_path / "r.runs.jsonl"
+    assert count_prior_runs(f) == 0
+    f.write_text(json.dumps(runs[0]) + "\n\n" + json.dumps(runs[1]) + "\n")
+    assert count_prior_runs(f) == 2                                   # blank lines are not runs
+    assert summarize_pilot([], [])["tokens_per_saved_candidate"] is None
+
+
+def test_different_seeds_give_different_attempt_streams():
+    """A fixed seed made every resume replay the same attempts; seed + prior_runs must change the stream."""
+    from atlasrag.bench.generate_v2 import ValidatedGenerator
+    ix = _gen_index()
+    a = ValidatedGenerator(ix, _JsonLLM(), {}, seed=1)
+    b = ValidatedGenerator(ix, _JsonLLM(), {}, seed=1 + 1)
+    same = ValidatedGenerator(ix, _JsonLLM(), {}, seed=1)
+    pick = lambda g: [g.rng.choice(g.pool["test"]) for _ in range(12)]
+    assert pick(a) == pick(same) and pick(a) != pick(b)
