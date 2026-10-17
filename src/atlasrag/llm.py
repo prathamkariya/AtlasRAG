@@ -51,6 +51,10 @@ class LLMClient:
         self.max_retries = int(cfg.get("max_retries", 2))
         self.retry_base_seconds = float(cfg.get("retry_base_seconds", 1.0))
         self.retry_max_seconds = float(cfg.get("retry_max_seconds", 4.0))
+        # Keep sequential benchmark generation below Groq's free-plan RPM cap.
+        # Cache hits bypass this; only provider requests are paced.
+        self.min_provider_interval_seconds = float(cfg.get("min_provider_interval_seconds", 0.0))
+        self._last_provider_request_at: float | None = None
         self.reasoning_effort = cfg.get("reasoning_effort")
         # reasoning models burn completion tokens on hidden thinking; give them room
         self.headroom = int(cfg.get("token_headroom", 0)) if self.reasoning_effort else 0
@@ -94,6 +98,10 @@ class LLMClient:
         attempt = {"n": 0}
 
         def create():
+            if self._last_provider_request_at is not None and self.min_provider_interval_seconds:
+                remaining = self.min_provider_interval_seconds - (time.monotonic() - self._last_provider_request_at)
+                if remaining > 0:
+                    time.sleep(remaining)
             attempt["n"] += 1
             self.stats["provider_calls"] += 1
             if attempt["n"] > 1:
@@ -102,9 +110,11 @@ class LLMClient:
             if self.reasoning_effort:
                 kwargs["extra_body"] = {"reasoning_effort": self.reasoning_effort}
             try:
-                return self.client.chat.completions.create(
+                response = self.client.chat.completions.create(
                     model=model, messages=messages, temperature=temperature,
                     max_tokens=max_tokens + self.headroom, **kwargs)
+                self._last_provider_request_at = time.monotonic()
+                return response
             except RateLimitError:
                 self.stats["rate_limit_errors"] += 1
                 raise
