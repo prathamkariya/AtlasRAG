@@ -60,3 +60,14 @@ def test_empty_completion_raises_helpful_error_and_is_not_cached(tmp_path, monke
     with pytest.raises(RuntimeError, match="token_headroom"):
         llm.chat([{"role": "user", "content": "hi"}])
     assert not list((tmp_path / "t").glob("*.json"))
+
+
+def test_paces_only_second_uncached_provider_request(tmp_path, monkeypatch):
+    llm = make(tmp_path, monkeypatch, min_provider_interval_seconds=2.1)
+    clock, sleeps = [10.0], []
+    monkeypatch.setattr("atlasrag.llm.time.monotonic", lambda: clock[0])
+    monkeypatch.setattr("atlasrag.llm.time.sleep", sleeps.append)
+    llm.chat([{"role": "user", "content": "first"}])
+    clock[0] = 11.0
+    llm.chat([{"role": "user", "content": "second"}])
+    assert sleeps == [pytest.approx(1.1)]

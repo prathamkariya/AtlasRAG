@@ -68,6 +68,7 @@ llm:
   max_retries: 2
   retry_base_seconds: 1.0
   retry_max_seconds: 4.0
+  min_provider_interval_seconds: 2.1
   cache_dir: data/llm_cache
   cache_namespace: default
 tracking:
