@@ -307,6 +307,13 @@ class ValidatedGenerator(Generator):
             return False
         return True
 
+    def _gen_name(self) -> str:
+        """The model that ACTUALLY generates: --model, else the client's configured model (never a placeholder)."""
+        return self.model or getattr(self.llm, "model", None) or "unknown"
+
+    def _judge_name(self) -> str:
+        return self.judge_model or self._gen_name()
+
     def make(self, qtype, split):
         q = self._make(qtype, split)
         self.vstats[f"attempt:{qtype}"] += 1
@@ -339,7 +346,7 @@ class ValidatedGenerator(Generator):
                 return None
             ok, reasons = verdict(validation, qtype)
             payload = {"ok": ok, "reasons": reasons, "verdict": validation,
-                       "judge_model": self.judge_model or self.model or "config-default", "generator_model": self.model or "config-default"}
+                       "judge_model": self._judge_name(), "generator_model": self._gen_name()}
             q = self._build(qtype, question, ref, idxs, ch, split, payload)
             if not ok:
                 for r in reasons: self.vstats[r] += 1
@@ -428,7 +435,7 @@ class ValidatedGenerator(Generator):
             status="candidate",
         )
         # provenance for EVERY question type (the structured path builds its own payload and used to omit it)
-        payload.setdefault("judge_model", self.judge_model or self.model or "config-default")
-        payload.setdefault("generator_model", self.model or "config-default")
+        payload.setdefault("judge_model", self._judge_name())
+        payload.setdefault("generator_model", self._gen_name())
         q.validation = json.dumps(payload)
         return q

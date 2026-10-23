@@ -84,3 +84,15 @@ def validation_run(questions) -> dict:
         except Exception:
             pass
     return out
+
+
+def self_judge_conflicts(questions, judge_model: str) -> list[str]:
+    """Ids of questions whose GENERATOR is the model about to judge them (self-agreement bias)."""
+    out = []
+    for q in questions:
+        try:
+            if json.loads(q.validation).get("generator_model") == judge_model:
+                out.append(q.id)
+        except Exception:
+            pass
+    return out

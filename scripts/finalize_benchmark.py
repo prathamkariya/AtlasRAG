@@ -22,20 +22,25 @@ ap.add_argument("--out-dir", default="data/bench/final")
 a = ap.parse_args()
 
 qs = load_questions(resolve(a.file))
-stab = json.loads(resolve(a.stability).read_text(encoding="utf-8"))["per_question"]
-final, rejected = finalize(qs, stab, a.require_runs, not a.allow_llm_assisted)
+stab_doc = json.loads(resolve(a.stability).read_text(encoding="utf-8"))
+stab, stab_model = stab_doc["per_question"], stab_doc.get("judge_model")
+if stab_model is None:
+    print("WARNING: the stability file does not record which model judged the repetitions (older file). "
+          "Rerun audit_stability.py so self-judging can be checked.")
+final, rejected = finalize(qs, stab, a.require_runs, not a.allow_llm_assisted, stab_model)
 out = resolve(a.out_dir) / a.benchmark_id
 out.mkdir(parents=True, exist_ok=True)
 save_questions(out / "questions_final.jsonl", final)
 cm = resolve(a.corpus_manifest)
 man = build_manifest(a.benchmark_id, final, rejected, sha_text_bytes((out / "questions_final.jsonl").read_bytes()),
-                     sha_text_bytes(cm.read_bytes()) if cm.exists() else None, a.require_runs, a.file, git_commit())
+                     sha_text_bytes(cm.read_bytes()) if cm.exists() else None, a.require_runs, a.file, git_commit(), stab_model)
 (out / "benchmark_manifest.json").write_text(json.dumps(man, indent=1), encoding="utf-8")
 
 print(f"{len(qs)} questions in -> {man['n_questions']} FINAL, {man['rejected_total']} rejected")
 print("rejected by reason:", man["rejected_by_reason"])
 print("final by type:", man["by_type"], "| papers:", man["n_distinct_papers"], "| max paper share:", man["max_paper_share"])
-print("review modes:", man["review_modes"], "| generator:", man["generator_models"], "| judge:", man["judge_models"])
+print("review modes:", man["review_modes"], "| generator:", man["generator_models"], "| judge:", man["judge_models"], "| stability judge:", man["stability_judge_model"])
+print("max paper share (any position):", man["max_paper_share"], "| by first paper only:", man["max_paper_share_first_paper"])
 if man["same_model_generated_and_judged"]:
     print("WARNING: the same model generated and judged some final questions (self-agreement bias)")
 bad = check_minimums(man["by_type"], parse_minimums(a.min_per_type))

@@ -208,7 +208,7 @@ def test_pilot_summary_is_correct_after_resumes(tmp_path):
     assert s["runs"] == 2 and s["provider_tokens_total"] == 250 and s["tokens_per_saved_candidate"] == 83
     assert s["saved_per_type"] == {"simple": 1, "chain": 2} and s["distinct_gold_papers"] == 3
     assert s["runs_stopped_by_rate_limit"] == 1 and s["cache_hits_total"] == 9 and s["rate_limit_errors_total"] == 2
-    assert s["saved_without_judge_model"] == 2 and s["share_of_one_200k_daily_budget"] == 0.001
+    assert s["saved_without_judge_model"] == 2 and "share_of_one_200k_daily_budget" not in s      # that field summed two models; it was not a quota figure
     f = tmp_path / "r.runs.jsonl"
     assert count_prior_runs(f) == 0
     f.write_text(json.dumps(runs[0]) + "\n\n" + json.dumps(runs[1]) + "\n")

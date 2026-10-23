@@ -53,11 +53,12 @@ def summarize_pilot(runs: list[dict], questions: list[dict]) -> dict:
     return {"runs": len(runs), "saved_total": n, "saved_per_type": dict(Counter(q["qtype"] for q in questions)),
             "distinct_gold_papers": len({p for q in questions for p in q.get("gold_paper_ids", [])}),
             "provider_tokens_total": tokens, "tokens_per_saved_candidate": round(tokens / n) if n else None,
-            "share_of_one_200k_daily_budget": round(tokens / 200000, 3),
+            # NOT a quota figure: it sums both models, retries and replays. Per-model quota is on the provider's usage page.
             "provider_calls_total": sum(llm(r, "provider_calls") for r in runs),
             "cache_hits_total": sum(llm(r, "cache_hits") for r in runs),
             "rate_limit_errors_total": sum(llm(r, "rate_limit_errors") for r in runs),
-            "runs_stopped_by_rate_limit": sum(1 for r in runs if r.get("stopped")),
+            "runs_stopped_by_rate_limit": sum(1 for r in runs if (r.get("stopped") or {}).get("reason") == "rate_limited"),
+            "runs_stopped_by_token_budget": sum(1 for r in runs if (r.get("stopped") or {}).get("reason") == "token_budget"),
             "generator_models": sorted({r.get("model") for r in runs if r.get("model")}),
             "judge_models": sorted({r.get("judge_model") for r in runs if r.get("judge_model")}),
             "saved_without_judge_model": sum(not _has_judge_model(q) for q in questions)}
