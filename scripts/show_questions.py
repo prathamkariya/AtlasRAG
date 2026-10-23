@@ -26,12 +26,9 @@ if not ids:
     sys.exit("nothing to show: pass --ids ... or --unstable (needs data\\bench\\audit_stability.json)")
 
 cfg = load_config()
-text_of = {}
-for p in (resolve(cfg["retrieval"]["index_dir"]) / "chunks.jsonl", resolve(cfg["corpus"]["processed_dir"]) / "chunks.jsonl"):
-    if p.exists():
-        for l in open(p, encoding="utf-8"):
-            c = json.loads(l); text_of[c["chunk_id"]] = (c["title"], c["section"], c["text"])
-        break
+from atlasrag.chunk_text import chunk_files, load_chunk_records
+text_of = {cid: (c["title"], c["section"], c["text"]) for cid, c in load_chunk_records(chunk_files(
+    resolve(cfg["retrieval"]["index_dir"]), resolve(cfg["corpus"]["processed_dir"]), resolve("."))).items()}
 judge = {}
 ap_ = resolve("data/bench/audit.jsonl")
 if ap_.exists():

@@ -22,11 +22,11 @@ a=ap.parse_args()
 
 cfg=load_config()
 
-chunks={}
-with open(resolve(cfg["retrieval"]["index_dir"])/"chunks.jsonl",encoding="utf-8") as f:
-    for line in f:
-        c=json.loads(line)
-        chunks[c["chunk_id"]]=c
+from atlasrag.chunk_text import chunk_files, load_chunk_records
+# passage text from the active corpus first, then any other committed chunks.jsonl: a review without the passages is blind
+chunks=load_chunk_records(chunk_files(resolve(cfg["retrieval"]["index_dir"]),resolve(cfg["corpus"]["processed_dir"]),resolve(".")))
+if not chunks:
+    sys.exit("no chunks.jsonl found (looked in the index folder and data/processed*/). Is the corpus built?")
 
 path=resolve(a.file)
 allq=load_questions(path)
@@ -46,6 +46,8 @@ def show_question(n,total,q):
 
     for cid in q.gold_chunk_ids:
         c=chunks.get(cid,{})
+        if not c:
+            print(f"\n!! WARNING: passage text for {cid} was NOT FOUND. Do not accept this question without reading its evidence.")
         print(
             f"\n--- {cid} | "
             f"{c.get('title','?')[:60]} | "

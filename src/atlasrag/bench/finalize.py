@@ -19,6 +19,7 @@ import subprocess
 import time
 from collections import Counter
 
+INVALID_MODEL_NAMES = {None, "", "unknown", "config-default"}      # placeholders are not provenance
 MIN_GOLD_CHUNKS = {"simple": 1, "multi_hop": 2, "conflicting": 2, "temporal": 2, "chain": 2}
 CROSS_PAPER = {"multi_hop", "conflicting", "temporal"}
 
@@ -31,7 +32,7 @@ def sha_text_bytes(b: bytes) -> str:
     return hashlib.sha256(b.replace(b"\r\n", b"\n")).hexdigest()
 
 
-def gate_reasons(q, stability: dict, require_runs: int = 3, require_human: bool = True) -> list[str]:
+def gate_reasons(q, stability: dict, require_runs: int = 3, require_human: bool = True, stability_model=None) -> list[str]:
     from .review_meta import review_mode
     r = []
     if q.status != "accepted":
@@ -62,17 +63,19 @@ def gate_reasons(q, stability: dict, require_runs: int = 3, require_human: bool 
         v = json.loads(q.validation) if q.validation else {}
     except json.JSONDecodeError:
         v = {}
-    if not v.get("judge_model"):
+    if v.get("judge_model") in INVALID_MODEL_NAMES:
         r.append("no_judge_model_recorded")
+    if stability_model and v.get("generator_model") == stability_model:
+        r.append("stability_self_judged")         # the repetitions were judged by the model that wrote the question
     return r
 
 
-def finalize(questions, stability: dict, require_runs: int = 3, require_human: bool = True):
+def finalize(questions, stability: dict, require_runs: int = 3, require_human: bool = True, stability_model=None):
     """Returns (final_questions, rejected {id: [reasons]})."""
     final, rejected = [], {}
     seen_q, seen_gold = set(), set()
     for q in questions:
-        reasons = gate_reasons(q, stability, require_runs, require_human)
+        reasons = gate_reasons(q, stability, require_runs, require_human, stability_model)
         if not reasons:
             key_q, key_g = norm_q(q.question), (q.qtype, tuple(sorted(q.gold_chunk_ids)))
             if key_q in seen_q:
@@ -101,27 +104,33 @@ def check_minimums(by_type: dict, minimums: dict) -> list[str]:
 
 
 def build_manifest(benchmark_id, final, rejected, questions_sha256, corpus_manifest_sha256=None, require_runs=3,
-                   source_file="", git_commit="unknown") -> dict:
+                   source_file="", git_commit="unknown", stability_model=None) -> dict:
     from .review_meta import review_mode
-    papers = Counter(p for q in final for p in dict.fromkeys(q.gold_paper_ids))
+    papers = Counter(p for q in final for p in set(q.gold_paper_ids))        # membership: every paper a question involves
     first = Counter((q.gold_paper_ids[0] if q.gold_paper_ids else "?") for q in final)
     models = {"generator": set(), "judge": set()}
+    self_judged = stab_self = 0
     for q in final:
         try:
             v = json.loads(q.validation)
-            models["generator"].add(v.get("generator_model", "?")); models["judge"].add(v.get("judge_model", "?"))
         except Exception:
-            pass
+            continue
+        gm, jm = v.get("generator_model", "?"), v.get("judge_model", "?")
+        models["generator"].add(gm); models["judge"].add(jm)
+        self_judged += gm == jm                                              # per QUESTION, not set overlap
+        stab_self += bool(stability_model) and gm == stability_model
     n = len(final)
     return {"benchmark_id": benchmark_id, "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "git_commit": git_commit,
             "source_file": source_file, "corpus_manifest_sha256": corpus_manifest_sha256,
             "questions_sha256": questions_sha256, "require_runs": require_runs,
             "n_questions": n, "by_type": dict(Counter(q.qtype for q in final)),
             "n_distinct_papers": len(papers),
-            "max_paper_share": round(max(first.values()) / n, 3) if n else None,       # share of questions whose FIRST gold paper is the most common one
+            "max_paper_share": round(max(papers.values()) / n, 3) if n else None,       # share of questions that INVOLVE the most common paper (any position)
+            "max_paper_share_first_paper": round(max(first.values()) / n, 3) if n else None,   # old definition, kept for comparison
             "review_modes": dict(Counter(review_mode(q) or "none" for q in final)),
             "generator_models": sorted(models["generator"]), "judge_models": sorted(models["judge"]),
-            "same_model_generated_and_judged": bool(models["generator"] & models["judge"]),
+            "self_judged_questions": self_judged, "same_model_generated_and_judged": self_judged > 0,
+            "stability_judge_model": stability_model, "stability_self_judged_questions": stab_self,
             "rejected_total": len(rejected),
             "rejected_by_reason": dict(Counter(r for rs in rejected.values() for r in rs))}
 
