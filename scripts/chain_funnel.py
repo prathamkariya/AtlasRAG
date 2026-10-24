@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from atlasrag.bench.generate_v2 import assess_chain_pair, scientific_signals
+from atlasrag.bench.generate_v2 import assess_chain_pair
 from atlasrag.bench.schema import paper_split
 
 ap = argparse.ArgumentParser()

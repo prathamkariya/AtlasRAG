@@ -1,6 +1,5 @@
 """Review benchmark questions interactively or in batches."""
 import argparse
-import json
 import sys
 import textwrap
 from pathlib import Path

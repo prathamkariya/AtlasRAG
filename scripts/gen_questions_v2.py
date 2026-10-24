@@ -8,7 +8,6 @@ import argparse, json, subprocess, sys, time
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from tqdm import tqdm
 from atlasrag.config import load_config, resolve
 from atlasrag.llm import LLMClient
 from atlasrag.retrieval.index import Index

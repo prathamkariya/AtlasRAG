@@ -21,7 +21,6 @@ def summarize_run(run: dict) -> dict:
         per_type[t] = {"attempts": a, "survived": s, "survival_rate": round(s / a, 3) if a else None}
     tokens = llm.get("provider_prompt_tokens", 0) + llm.get("provider_completion_tokens", 0)
     surv = sum(v["survived"] for v in per_type.values())
-    reasons = Counter({k: v for k, v in o.items() if ":" not in k.split("pair:")[0] or k.startswith("pair:")})
     skip = {"passed", "generator_returned_none"}
     top = [(k, v) for k, v in Counter({k: v for k, v in o.items() if not k.startswith(("attempt:", "survived:")) and k not in skip}).most_common(8)]
     return {"per_type": per_type, "total_survivors": surv, "provider_tokens": tokens,

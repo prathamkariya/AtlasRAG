@@ -35,3 +35,11 @@ def build_router(name: str, cfg: dict, llm=None, gold=None):
 
 
 AVAILABLE_NOW = ["vanilla", "static", "heuristic", "llm"]
+
+
+# Explicit public re-exports for callers and static analyzers.
+__all__ = [
+    "Router", "RouteDecision", "LABELS", "FixedRouter", "HeuristicRouter",
+    "LLMRouter", "OracleRouter", "CompassRouter", "EscalatingRouter",
+    "build_router", "AVAILABLE_NOW",
+]
