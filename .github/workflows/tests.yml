@@ -13,6 +13,7 @@ jobs:
           python-version: "3.12"
       # Light dependencies only: tests use fakes, so no torch / sentence-transformers download.
       - run: pip install numpy pyyaml python-dotenv rank-bm25 pytest openai httpx tqdm pymupdf requests arxiv
+      - run: python -m compileall -q src scripts tests
       - run: PYTHONPATH=src python -m pytest -q
       - name: committed corpus matches its manifest (skipped until a manifest exists)
         run: |
