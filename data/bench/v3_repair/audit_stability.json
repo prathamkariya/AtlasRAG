@@ -1,0 +1,78 @@
+{
+ "runs": 3,
+ "questions": 6,
+ "classes": {
+  "stable_pass": 2,
+  "unstable": 4
+ },
+ "by_type": {
+  "chain": {
+   "unstable": 1
+  },
+  "multi_hop": {
+   "stable_pass": 2,
+   "unstable": 1
+  },
+  "temporal": {
+   "unstable": 2
+  }
+ },
+ "pairwise_agreement": 0.5555555555555556,
+ "per_question": {
+  "multi_hop-ecbf29ba": {
+   "verdicts": [
+    true,
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-fde55a12": {
+   "verdicts": [
+    false,
+    false,
+    true
+   ],
+   "class": "unstable",
+   "type": "multi_hop"
+  },
+  "multi_hop-8a835819": {
+   "verdicts": [
+    true,
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "chain-424b58d2": {
+   "verdicts": [
+    false,
+    true,
+    true
+   ],
+   "class": "unstable",
+   "type": "chain"
+  },
+  "temporal-175431c7": {
+   "verdicts": [
+    false,
+    false,
+    true
+   ],
+   "class": "unstable",
+   "type": "temporal"
+  },
+  "temporal-4e23e87b": {
+   "verdicts": [
+    true,
+    false,
+    true
+   ],
+   "class": "unstable",
+   "type": "temporal"
+  }
+ },
+ "judge_model": "openai/gpt-oss-120b"
+}

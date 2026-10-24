@@ -91,9 +91,17 @@ class Generator:
         return str(self.meta.get(paper_id, {}).get("published", ""))[:10]
 
     def _ask(self, task: str, body: str):
+        call_options = {}
+        effort = getattr(self, "generation_reasoning_effort", None)
+        headroom = getattr(self, "generation_token_headroom", None)
+        if effort is not None:
+            call_options["reasoning_effort"] = effort
+        if headroom is not None:
+            call_options["token_headroom"] = headroom
         out = self.llm.chat([{"role": "system", "content": COMMON + " " + task},
                              {"role": "user", "content": body}],
-                            temperature=0.3, max_tokens=300, model=self.model)
+                            temperature=0.3, max_tokens=600, model=self.model,
+                            **call_options)
         return parse_qa(out)
 
     def make(self, qtype: str, split: str):

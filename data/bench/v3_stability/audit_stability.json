@@ -1,0 +1,203 @@
+{
+ "runs": 2,
+ "questions": 22,
+ "classes": {
+  "stable_pass": 18,
+  "stable_fail": 3,
+  "unstable": 1
+ },
+ "by_type": {
+  "chain": {
+   "stable_pass": 2,
+   "unstable": 1
+  },
+  "multi_hop": {
+   "stable_pass": 14,
+   "stable_fail": 1
+  },
+  "temporal": {
+   "stable_pass": 2,
+   "stable_fail": 2
+  }
+ },
+ "pairwise_agreement": 0.9545454545454546,
+ "per_question": {
+  "multi_hop-e785e7eb": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-3df03bc8": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-7659b455": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-50549cd8": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-aba4519e": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-fde55a12": {
+   "verdicts": [
+    false,
+    false
+   ],
+   "class": "stable_fail",
+   "type": "multi_hop"
+  },
+  "multi_hop-7ab6a408": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-1814f312": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-21a0034a": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-cb3795ba": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-932f6847": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-cae12124": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-5e31331e": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-e40883f7": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "multi_hop-df32e799": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "multi_hop"
+  },
+  "chain-89a8604c": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "chain"
+  },
+  "chain-bd9b43c2": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "chain"
+  },
+  "chain-424b58d2": {
+   "verdicts": [
+    false,
+    true
+   ],
+   "class": "unstable",
+   "type": "chain"
+  },
+  "temporal-b7cfd1d5": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "temporal"
+  },
+  "temporal-175431c7": {
+   "verdicts": [
+    false,
+    false
+   ],
+   "class": "stable_fail",
+   "type": "temporal"
+  },
+  "temporal-4e23e87b": {
+   "verdicts": [
+    false,
+    false
+   ],
+   "class": "stable_fail",
+   "type": "temporal"
+  },
+  "temporal-3f612d97": {
+   "verdicts": [
+    true,
+    true
+   ],
+   "class": "stable_pass",
+   "type": "temporal"
+  }
+ },
+ "judge_model": "openai/gpt-oss-120b"
+}

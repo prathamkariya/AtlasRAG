@@ -19,23 +19,44 @@ class LLMRateLimitExceeded(RuntimeError):
 
 def run_with_bounded_retries(operation, *, retries: int, base_delay_s: float,
                              max_delay_s: float, sleep=time.sleep,
-                             retryable: tuple[type[BaseException], ...]):
-    """Run an operation at most ``retries + 1`` times with capped backoff.
+                             retryable: tuple[type[BaseException], ...],
+                             max_provider_wait_s: float = 30.0):
+    """Retry with bounded backoff while respecting short provider retry hints.
 
-    The OpenAI client is configured with its own retries disabled, so this is
-    the sole retry policy and its delay budget is explicit and testable.
+    Rate-limit hints up to max_provider_wait_s are honored with a small safety
+    margin. Longer hints stop early rather than sleeping through a likely
+    exhausted quota/window. The SDK's own retries remain disabled.
     """
+    from .ratelimit import suggested_wait
+
     for attempt in range(retries + 1):
         try:
             return operation()
         except retryable as exc:
+            is_rate_limit = isinstance(exc, retryable[0])
+            hint = suggested_wait(exc) if is_rate_limit else None
+
+            if is_rate_limit and hint is not None and hint > max_provider_wait_s:
+                raise LLMRateLimitExceeded(
+                    f"provider requested retry after {hint:.1f}s, exceeding the "
+                    f"configured {max_provider_wait_s:.1f}s short-wait cap; stop and resume later"
+                ) from exc
+
             if attempt == retries:
-                if isinstance(exc, retryable[0]):
+                if is_rate_limit:
+                    detail = str(exc).strip()
+                    suffix = f"; provider message: {detail}" if detail else ""
+                    if hint is not None:
+                        suffix += f"; suggested_wait_s={hint:.1f}"
                     raise LLMRateLimitExceeded(
-                        f"rate limited after {attempt + 1} attempts; rerun later to resume"
+                        f"rate limited after {attempt + 1} attempts; rerun later to resume{suffix}"
                     ) from exc
                 raise
-            delay = min(base_delay_s * (2 ** attempt), max_delay_s)
+
+            if is_rate_limit and hint is not None:
+                delay = min(max_provider_wait_s, hint) + 0.5
+            else:
+                delay = min(base_delay_s * (2 ** attempt), max_delay_s)
             sleep(delay)
 
 
@@ -74,17 +95,18 @@ class LLMClient:
     def snapshot(self) -> dict:
         return dict(self.stats)
 
-    def _key(self, model, messages, temperature, max_tokens) -> str:
-        blob = json.dumps([model, messages, temperature, max_tokens, self.reasoning_effort], sort_keys=True)
+    def _key(self, model, messages, temperature, max_tokens, reasoning_effort=None, token_headroom=None) -> str:
+        blob = json.dumps([model, messages, temperature, max_tokens, reasoning_effort, token_headroom], sort_keys=True)
         return hashlib.sha256(blob.encode()).hexdigest()
 
-    def chat(self, messages: list[dict], temperature: float = 0.0,
-             max_tokens: int = 700, model: str | None = None) -> str:
+    def chat( self, messages: list[dict], temperature: float = 0.0, max_tokens: int = 700, model: str | None = None, reasoning_effort: str | None = None, token_headroom: int | None = None, ) -> str:
         model = model or self.model
+        effort = reasoning_effort if reasoning_effort is not None else self.reasoning_effort
+        headroom = token_headroom if token_headroom is not None else self.headroom
         self.stats["calls"] += 1
         path = None
         if self.cache_dir is not None:
-            path = self.cache_dir / f"{self._key(model, messages, temperature, max_tokens)}.json"
+            path = self.cache_dir / f"{self._key(model, messages, temperature, max_tokens, effort, headroom)}.json"
             if path.exists():
                 hit = json.loads(path.read_text(encoding="utf-8"))
                 self.stats["cache_hits"] += 1
@@ -107,12 +129,12 @@ class LLMClient:
             if attempt["n"] > 1:
                 self.stats["retry_attempts"] += 1
             kwargs = {}
-            if self.reasoning_effort:
-                kwargs["extra_body"] = {"reasoning_effort": self.reasoning_effort}
+            if effort:
+                kwargs["extra_body"] = {"reasoning_effort": effort}
             try:
                 response = self.client.chat.completions.create(
                     model=model, messages=messages, temperature=temperature,
-                    max_tokens=max_tokens + self.headroom, **kwargs)
+                    max_tokens=max_tokens + headroom, **kwargs)
                 self._last_provider_request_at = time.monotonic()
                 return response
             except RateLimitError:

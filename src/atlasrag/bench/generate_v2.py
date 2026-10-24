@@ -72,12 +72,13 @@ def scientific_signals(text: str) -> set[str]:
 
 
 def specific_scientific_signals(text: str) -> set[str]:
-    """Return high-precision anchors: acronyms, parameters, and model symbols."""
+    """Extract high-precision scientific anchors, including named parameters."""
     patterns = (
-        r"\b[A-Z]{2,}[A-Za-z0-9_+\-]*\b",       # DESI, BAO, FLRW
-        r"\b[A-Za-z]+\d+[A-Za-z0-9_+\-]*\b",   # H0, Neff, omega_b2 (>=1 leading letter: bare numbers are not anchors)
-        r"\b[a-z][A-Z][A-Za-z0-9_+\-]*\b",      # mH, wCDM
-        r"[ΩΛΔξ][A-Za-z0-9_+\-]+",                # Ωm, ΛCDM, ΔNeff
+        r"\b[A-Z]{2,}[A-Za-z0-9_+\-]*\b",          # DESI, BAO, FLRW
+        r"\b[A-Za-z]+\d+[A-Za-z0-9_+\-]*\b",      # H0, Neff
+        r"\b[a-z][A-Z][A-Za-z0-9_+\-]*\b",         # mH, wCDM
+        r"[\u03a9\u039b\u0394\u03be][A-Za-z0-9_+\-]+",  # Greek scientific symbols
+        r"\b(?:omega|Omega|OMEGA|delta|Delta|DELTA|lambda|Lambda|LAMBDA|xi|Xi|XI)_[A-Za-z0-9]+\b",
     )
     return {
         match.lower()
@@ -259,10 +260,15 @@ class ValidatedGenerator(Generator):
                 [{"role": "system", "content": STRUCTURED_SYSTEM + " " + task},
                  {"role": "user", "content": body}],
                 temperature=0.2,
-                max_tokens=450,
+                max_tokens=600,
                 model=self.model,
+                **({"reasoning_effort": self.generation_reasoning_effort}
+                   if getattr(self, "generation_reasoning_effort", None) is not None else {}),
+                **({"token_headroom": self.generation_token_headroom}
+                   if getattr(self, "generation_token_headroom", None) is not None else {}),
             )
-        except LLMRateLimitExceeded:
+        except LLMRateLimitExceeded as exc:
+            print(f"[rate limit detail] {exc}")
             self.vstats["rate_limited"] += 1
             return None
         return _parse_structured(out)
@@ -294,7 +300,8 @@ class ValidatedGenerator(Generator):
     def _judge(self, question: str, reference: str, passages: list[str]):
         try:
             return judge_support(self.llm, question, reference, passages, model=self.judge_model or self.model)
-        except LLMRateLimitExceeded:
+        except LLMRateLimitExceeded as exc:
+            print(f"[rate limit detail] {exc}")
             self.vstats["rate_limited"] += 1
             return None
 
@@ -332,7 +339,8 @@ class ValidatedGenerator(Generator):
         if qtype == "simple":
             try:
                 qa = self._ask(TASKS[qtype], f"Passage:\n{ch[i]['text'][:1200]}")
-            except LLMRateLimitExceeded:
+            except LLMRateLimitExceeded as exc:
+                print(f"[rate limit detail] {exc}")
                 self.vstats["rate_limited"] += 1
                 return None
             if qa is None:

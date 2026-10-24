@@ -25,6 +25,10 @@ ap.add_argument("--types", nargs="*", default=["simple", "multi_hop", "chain"])
 ap.add_argument("--attempts", type=int, default=6)
 ap.add_argument("--model", help="generation model"); ap.add_argument("--seed", type=int, default=1)
 ap.add_argument("--judge-model", help="support-audit model; use a DIFFERENT one than --model")
+ap.add_argument("--generation-reasoning-effort", choices=["low", "medium", "high"], default=None,
+                help="override reasoning effort for generation calls only")
+ap.add_argument("--generation-token-headroom", type=int, default=None,
+                help="extra completion-token allowance for generation calls only")
 ap.add_argument("--max-provider-tokens", type=int, default=0,
                 help="stop this invocation after N provider tokens (0 = no limit). Protects a daily cap on unattended runs. Exit code 4.")
 ap.add_argument("--out", default="data/bench/questions_v2.jsonl")
@@ -47,6 +51,9 @@ existing = load_questions(out); seen = {q.id for q in existing}
 llm = LLMClient(cfg["llm"], cache_root=resolve(cfg["llm"]["cache_dir"]))
 gen = ValidatedGenerator(Index.load(resolve(cfg["retrieval"]["index_dir"])), llm,
                          load_meta(resolve(cfg["corpus"]["raw_dir"])), seed=seed_used, model=a.model, judge_model=a.judge_model)
+
+gen.generation_reasoning_effort = a.generation_reasoning_effort
+gen.generation_token_headroom = a.generation_token_headroom
 
 per_type, stopped, t0, error = {}, None, time.time(), None
 try:
