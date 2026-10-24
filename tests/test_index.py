@@ -44,3 +44,14 @@ def test_topk_handles_zero_and_empty_inputs():
     from atlasrag.retrieval.index import _topk
     assert _topk(np.array([1.0, 2.0]), 0) == []
     assert _topk(np.array([], dtype="float32"), 5) == []
+
+
+def test_index_build_validates_embeddings_before_writing_files(tmp_path):
+    class BadEmbedder:
+        def encode_docs(self, texts):
+            return np.zeros((0, 3), dtype="float32")
+
+    chunks = [{"chunk_id": "p::0", "paper_id": "p", "title": "T", "section": "S", "text": "some text"}]
+    with pytest.raises(ValueError, match="count mismatch"):
+        Index.build(chunks, BadEmbedder(), tmp_path / "bad-index")
+    assert list((tmp_path / "bad-index").iterdir()) == []
