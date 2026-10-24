@@ -74,7 +74,7 @@ gen.generation_token_headroom = a.generation_token_headroom
 per_type, stopped, t0, error = {}, None, time.time(), None
 try:
     for qt in a.types:
-        got = sum(1 for q in existing if q.qtype == qt and q.split == a.split and q.status == "candidate")
+        got = sum(1 for q in existing if q.qtype == qt and q.split == a.split and q.status in {"candidate", "accepted"})
         tries = 0
         while got < a.per_type and tries < a.per_type * a.attempts:
             tries += 1

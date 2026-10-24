@@ -62,7 +62,7 @@ def cumulative_tokens(summary_path: Path) -> int:
 def existing_counts(out_path: Path, split: str, types: list[str]) -> dict[str, int]:
     counts = {t: 0 for t in types}
     for row in read_jsonl(out_path):
-        if row.get("split") != split or row.get("status", "candidate") != "candidate":
+        if row.get("split") != split or row.get("status", "candidate") not in {"candidate", "accepted"}:
             continue
         qtype = row.get("qtype")
         if qtype in counts:
@@ -102,9 +102,9 @@ def main() -> int:
     p.add_argument("--split", choices=("test", "train"), default="test")
     p.add_argument("--types", nargs="+", default=["simple", "multi_hop"])
     p.add_argument("--target-per-type", type=int, default=50,
-                   help="audited candidate target per type; human review is still required.")
+                   help="target for non-rejected questions per type; candidate rows still need human review.")
     p.add_argument("--batch-size", type=int, default=5,
-                   help="maximum additional audited candidates targeted per type in each invocation.")
+                   help="maximum additional non-rejected questions targeted per type in each invocation.")
     p.add_argument("--attempts", type=int, default=3,
                    help="candidate attempts per missing question in the generator.")
     p.add_argument("--model", default="qwen/qwen3.8-27b")
@@ -172,7 +172,7 @@ def main() -> int:
     print(f"  output: {out}")
     print(f"  run log: {summary}")
     print(f"  split/types: {args.split} / {', '.join(args.types)}")
-    print(f"  target: {args.target_per_type} audited candidates per type; batch size: {args.batch_size}")
+    print(f"  target: {args.target_per_type} non-rejected questions per type; batch size: {args.batch_size}")
     print(f"  cumulative provider tokens already logged: {cumulative_tokens(summary):,}")
     print("  scheduling: manual (this process runs only when launched)")
     print("Existing output is resumed; it will not be truncated.")
