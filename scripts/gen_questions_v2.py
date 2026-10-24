@@ -8,7 +8,6 @@ import argparse, json, subprocess, sys, time
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from tqdm import tqdm
 from atlasrag.config import load_config, resolve
 from atlasrag.llm import LLMClient
 from atlasrag.retrieval.index import Index
@@ -35,6 +34,22 @@ ap.add_argument("--out", default="data/bench/questions_v2.jsonl")
 ap.add_argument("--summary", help="run-summary JSONL (default: <out>.runs.jsonl)")
 a = ap.parse_args()
 
+if a.per_type < 0:
+    ap.error("--per-type must be >= 0")
+if a.attempts < 1:
+    ap.error("--attempts must be >= 1")
+if not a.types:
+    ap.error("--types must include at least one question type")
+if len(set(a.types)) != len(a.types):
+    ap.error("--types must not contain duplicates")
+unknown_types = sorted(set(a.types) - set(QTYPES))
+if unknown_types:
+    ap.error(f"unknown question type(s): {', '.join(unknown_types)}; choose from {', '.join(QTYPES)}")
+if a.max_provider_tokens < 0:
+    ap.error("--max-provider-tokens must be >= 0")
+if a.generation_token_headroom is not None and a.generation_token_headroom < 0:
+    ap.error("--generation-token-headroom must be >= 0")
+
 
 def git_commit():
     try:
@@ -44,7 +59,7 @@ def git_commit():
 
 
 cfg = load_config(); out = resolve(a.out)
-summary_path = Path(a.summary) if a.summary else out.with_suffix(".runs.jsonl")
+summary_path = resolve(a.summary) if a.summary else out.with_suffix(".runs.jsonl")
 prior_runs = count_prior_runs(summary_path)         # each resume gets a NEW sample stream: a fixed seed replayed the same attempts
 seed_used = a.seed + prior_runs
 existing = load_questions(out); seen = {q.id for q in existing}
@@ -58,7 +73,7 @@ gen.generation_token_headroom = a.generation_token_headroom
 per_type, stopped, t0, error = {}, None, time.time(), None
 try:
     for qt in a.types:
-        got = sum(1 for q in existing if q.qtype == qt and q.split == a.split)
+        got = sum(1 for q in existing if q.qtype == qt and q.split == a.split and q.status in {"candidate", "accepted"})
         tries = 0
         while got < a.per_type and tries < a.per_type * a.attempts:
             tries += 1

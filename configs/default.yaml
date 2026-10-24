@@ -49,6 +49,7 @@ llm:
   max_retries: 2                 # at most 3 total attempts; SDK retries are disabled
   retry_base_seconds: 1.0
   retry_max_seconds: 4.0         # current policy waits at most 1 + 2 = 3 seconds
+  min_provider_interval_seconds: 2.1  # pace uncached provider requests below the usual free-tier RPM limit
   cache_dir: data/llm_cache
   cache_namespace: default            # change namespace to force fresh calls on a stability rerun
 

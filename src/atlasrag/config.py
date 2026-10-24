@@ -10,9 +10,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def load_config(path: str | Path | None = None) -> dict:
-    path = Path(path or os.getenv("ATLAS_CONFIG") or ROOT / "configs" / "default.yaml")
-    with open(path, "r", encoding="utf-8") as f:
+    configured = path or os.getenv("ATLAS_CONFIG") or ROOT / "configs" / "default.yaml"
+    config_path = Path(configured)
+    if not config_path.is_absolute():
+        config_path = ROOT / config_path
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
+    if not isinstance(cfg, dict) or not isinstance(cfg.get("llm"), dict):
+        raise ValueError(f"invalid AtlasRAG config structure in {config_path}: expected an 'llm' mapping")
     if os.getenv("ATLAS_LLM_MODEL"):
         cfg["llm"]["model"] = os.environ["ATLAS_LLM_MODEL"]
     if os.getenv("ATLAS_CACHE_NAMESPACE"):

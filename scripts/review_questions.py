@@ -1,6 +1,5 @@
 """Review benchmark questions interactively or in batches."""
 import argparse
-import json
 import sys
 import textwrap
 from pathlib import Path
@@ -14,13 +13,14 @@ from atlasrag.bench.review_meta import mark_review
 
 ap=argparse.ArgumentParser()
 ap.add_argument("--file",default="data/bench/questions.jsonl")
+ap.add_argument("--config", help="config YAML matching the questions' corpus, e.g. configs/corpus_v2.yaml")
 ap.add_argument("--split",default="test")
 ap.add_argument("--types",nargs="*")
 ap.add_argument("--batch",type=int,default=0)
 ap.add_argument("--apply",default="")
 a=ap.parse_args()
 
-cfg=load_config()
+cfg=load_config(a.config)
 
 from atlasrag.chunk_text import chunk_files, load_chunk_records
 # passage text from the active corpus first, then any other committed chunks.jsonl: a review without the passages is blind

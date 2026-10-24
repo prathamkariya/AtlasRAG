@@ -2,7 +2,7 @@
 
 Adaptive retrieval routing for scientific literature (astrophysics / arXiv) — a replication and extension.
 
-> Compass implements and extends the adaptive retrieval-routing paradigm established by Adaptive-RAG for scientific literature, with emphasis on question-type-specific behavior and scientific evidence structure.
+> Research focus: testing adaptive retrieval routing on scientific literature, with emphasis on question-type-specific behavior and scientific evidence structure. Compass is a planned learned router; its current class is a placeholder and is not a working baseline.
 
 **Research question:** does adaptive retrieval routing give consistent benefits for scientific-literature QA, or are its gains concentrated in particular question types and evidence structures? Full spec in `docs/`.
 
@@ -13,7 +13,7 @@ python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\a
 pip install -r requirements.txt
 cp .env.example .env                                   # add GROQ_API_KEY (free, no card)
 make check                                             # imports + keys; `python scripts/check_env.py --ping` tests the LLM
-make test                                              # 22 offline tests, no keys needed
+make test                                              # offline tests; no API keys needed
 make fetch                                             # arXiv metadata + PDFs (polite: 3s delay)
 make index                                             # parse -> chunk -> embed -> index
 make serve                                             # http://localhost:8000/docs
@@ -33,6 +33,8 @@ Docker: `cp .env.example .env && docker compose up --build`
 ## Week 2: benchmark (built, tested offline)
 See `docs/WEEK2_GUIDE.md`. Pipeline: `gen_questions` -> `review_questions` (human) -> `label_oracle` -> `run_experiment` -> `report`.
 
+For the quality-gated V2 candidate pipeline, use `python scripts/gen_questions_v2.py --split test --per-type 10 --types simple multi_hop --attempts 3 --out data/bench/pilot.jsonl`. The resumable runner is `python scripts/auto_gen_questions.py`. Generated rows remain **candidates** until a human reviews them; an automated support audit is not human acceptance. To use the larger corpus, set `ATLAS_CONFIG=configs/corpus_v2.yaml` before running a command. To inspect a question and its evidence, use `python scripts/show_questions.py --config configs/corpus_v2.yaml --file data/bench/questions_v3.jsonl --ids <question-id>`. To accept/reject candidates, use `python scripts/review_questions.py --config configs/corpus_v2.yaml --file data/bench/questions_v3.jsonl --split test`.
+
 ## How experiments map to code
 One pipeline (`pipeline.py`). The router returns a strategy label; `configs/default.yaml -> strategies` defines what runs.
 
@@ -48,7 +50,7 @@ One pipeline (`pipeline.py`). The router returns a strategy label; `configs/defa
 
 ## Rules that keep the study honest
 - Every experiment uses the same pipeline; only the router changes.
-- Run every comparison twice (change `llm.cache_namespace` for the rerun) and check rankings hold.
+- Run every comparison twice (set `ATLAS_CACHE_NAMESPACE=stability-run-2` for the rerun) and check rankings hold. The environment override is honored by the client; use a separate namespace so repeat runs are uncached.
 - Measure latency on uncached runs only. LLM-call and token counts are cache-independent.
 - Compass never sees the answering LLM's context.
 - Never state results before running them.

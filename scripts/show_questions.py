@@ -11,6 +11,7 @@ from atlasrag.bench.schema import load_questions
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--file", default="data/bench/questions.jsonl")
+ap.add_argument("--config", help="config YAML matching the questions' corpus, e.g. configs/corpus_v2.yaml")
 ap.add_argument("--ids", nargs="*", default=[])
 ap.add_argument("--unstable", action="store_true", help="show the questions classed 'unstable' in audit_stability.json")
 ap.add_argument("--max-chars", type=int, default=1400)
@@ -25,7 +26,7 @@ if a.unstable:
 if not ids:
     sys.exit("nothing to show: pass --ids ... or --unstable (needs data\\bench\\audit_stability.json)")
 
-cfg = load_config()
+cfg = load_config(a.config)
 from atlasrag.chunk_text import chunk_files, load_chunk_records
 text_of = {cid: (c["title"], c["section"], c["text"]) for cid, c in load_chunk_records(chunk_files(
     resolve(cfg["retrieval"]["index_dir"]), resolve(cfg["corpus"]["processed_dir"]), resolve("."))).items()}

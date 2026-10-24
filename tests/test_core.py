@@ -4,7 +4,7 @@ from atlasrag.ingest.chunking import chunk_section, build_chunks
 from atlasrag.ingest.pdf_parse import split_sections, is_heading
 from atlasrag.ingest.arxiv_fetch import build_query
 from atlasrag.retrieval.fusion import rrf
-from atlasrag.routers import build_router, HeuristicRouter, EscalatingRouter, OracleRouter, FixedRouter
+from atlasrag.routers import build_router, HeuristicRouter, EscalatingRouter, OracleRouter
 from atlasrag.routers.base import Router, RouteDecision
 
 
@@ -84,3 +84,20 @@ def test_escalation_threshold_behaviour():
 def test_compass_is_a_clear_placeholder():
     with pytest.raises(NotImplementedError):
         build_router("compass", {}).route("q")
+
+
+def test_llm_router_rejects_valid_non_object_json_and_non_finite_confidence():
+    from atlasrag.routers.llm_router import LLMRouter
+
+    class Reply:
+        def __init__(self, response):
+            self.response = response
+
+        def chat(self, *args, **kwargs):
+            return self.response
+
+    for response in ('["SIMPLE"]', '{"label":"SIMPLE","confidence":NaN}'):
+        decision = LLMRouter(Reply(response)).route("question")
+        assert decision.label == "UNCERTAIN"
+        assert decision.confidence == 0.0
+        assert decision.source == "llm:parse_fail"

@@ -3,7 +3,6 @@ import sys
 import types
 from datetime import datetime, timezone
 
-import pytest
 
 from atlasrag.ingest.arxiv_fetch import build_query, fetch_papers
 
@@ -80,3 +79,11 @@ def test_fetch_is_resumable_and_does_not_duplicate(tmp_path, monkeypatch):
     assert fetch_papers(["x"], [], 10, "2023-01-01", tmp_path, delay=0) == 2
     assert fetch_papers(["x"], [], 10, "2023-01-01", tmp_path, delay=0) == 0
     assert len(open(tmp_path / "metadata.jsonl").read().strip().splitlines()) == 2
+
+
+def test_fetch_without_lower_date_uses_safe_arxiv_floor(tmp_path, monkeypatch):
+    res = [FakeResult(1, D(2024, 6, 1))]
+    seen = install_fake_arxiv(monkeypatch, res)
+    n = fetch_papers(["astro-ph.CO"], [], 10, None, tmp_path, delay=0)
+    assert n == 1
+    assert "submittedDate" not in seen["query"]

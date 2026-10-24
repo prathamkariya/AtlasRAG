@@ -2,7 +2,7 @@ import types
 import pytest
 
 pytest.importorskip("openai")
-from atlasrag.llm import LLMClient
+from atlasrag.llm import LLMClient, LLMEmptyCompletion
 
 
 def _resp(text, finish="stop"):
@@ -21,8 +21,10 @@ class FakeAPI:
         return _resp(self.text, self.finish)
 
 
-def make(tmp_path, monkeypatch, **cfg_over):
+def make(tmp_path, monkeypatch, *, respect_env_namespace=False, **cfg_over):
     monkeypatch.setenv("GROQ_API_KEY", "x")
+    if not respect_env_namespace:
+        monkeypatch.delenv("ATLAS_CACHE_NAMESPACE", raising=False)
     cfg = {"base_url": "http://x", "model": "m", "reasoning_effort": "low", "token_headroom": 400,
            "cache_namespace": "t"}
     cfg.update(cfg_over)
@@ -71,3 +73,48 @@ def test_paces_only_second_uncached_provider_request(tmp_path, monkeypatch):
     clock[0] = 11.0
     llm.chat([{"role": "user", "content": "second"}])
     assert sleeps == [pytest.approx(1.1)]
+
+
+def test_corrupt_cache_is_evicted_and_regenerated(tmp_path, monkeypatch):
+    llm = make(tmp_path, monkeypatch)
+    messages = [{"role": "user", "content": "recover a corrupt cache"}]
+    llm.chat(messages)
+    cached = next((tmp_path / "t").glob("*.json"))
+    cached.write_text("{not-json", encoding="utf-8")
+    assert llm.chat(messages) == "hello"
+    assert len(llm.client.calls) == 2
+    assert llm.stats["cache_corruptions"] == 1
+    assert llm.stats["cache_hits"] == 0
+
+
+def test_empty_completion_uses_a_specific_recoverable_exception(tmp_path, monkeypatch):
+    llm = make(tmp_path, monkeypatch)
+    llm.client = FakeAPI(text="", finish="length")
+    with pytest.raises(LLMEmptyCompletion, match="token_headroom"):
+        llm.chat([{"role": "user", "content": "hi"}])
+
+
+def test_empty_text_in_valid_cache_is_evicted_and_regenerated(tmp_path, monkeypatch):
+    llm = make(tmp_path, monkeypatch)
+    messages = [{"role": "user", "content": "recover empty cached text"}]
+    llm.chat(messages)
+    cached = next((tmp_path / "t").glob("*.json"))
+    cached.write_text('{"text":"","prompt_tokens":7,"completion_tokens":3}', encoding="utf-8")
+    assert llm.chat(messages) == "hello"
+    assert len(llm.client.calls) == 2
+    assert llm.stats["cache_corruptions"] == 1
+
+
+def test_cache_namespace_environment_override_is_honored(tmp_path, monkeypatch):
+    monkeypatch.setenv("ATLAS_CACHE_NAMESPACE", "unit-run-2")
+    llm = make(tmp_path, monkeypatch, respect_env_namespace=True)
+    assert llm.cache_dir == tmp_path / "unit-run-2"
+    llm.chat([{"role": "user", "content": "separate namespace"}])
+    assert list((tmp_path / "unit-run-2").glob("*.json"))
+
+
+@pytest.mark.parametrize("namespace", ["../outside", "folder/name", r"folder\name", "..", ""])
+def test_cache_namespace_rejects_paths_and_empty_names(tmp_path, monkeypatch, namespace):
+    monkeypatch.setenv("ATLAS_CACHE_NAMESPACE", namespace)
+    with pytest.raises(ValueError, match="single non-empty folder name"):
+        make(tmp_path, monkeypatch, respect_env_namespace=True)

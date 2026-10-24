@@ -17,6 +17,10 @@ class LLMRateLimitExceeded(RuntimeError):
     """A provider rate limit remained after the configured bounded retries."""
 
 
+class LLMEmptyCompletion(RuntimeError):
+    """The provider returned no usable completion (often because reasoning was truncated)."""
+
+
 def run_with_bounded_retries(operation, *, retries: int, base_delay_s: float,
                              max_delay_s: float, sleep=time.sleep,
                              retryable: tuple[type[BaseException], ...],
@@ -81,7 +85,14 @@ class LLMClient:
         self.headroom = int(cfg.get("token_headroom", 0)) if self.reasoning_effort else 0
         self.cache_dir = None
         if cache_root is not None:
-            self.cache_dir = Path(cache_root) / cfg.get("cache_namespace", "default")
+            # Use an environment override for isolated runs; never silently mix
+            # new generation/stability output into the tracked Run 1 cache.
+            namespace_override = os.getenv("ATLAS_CACHE_NAMESPACE")
+            namespace = namespace_override if namespace_override is not None else cfg.get("cache_namespace", "default")
+            if (not isinstance(namespace, str) or not namespace.strip()
+                    or namespace in {".", ".."} or "/" in namespace or "\\" in namespace):
+                raise ValueError("ATLAS_CACHE_NAMESPACE / llm.cache_namespace must be a single non-empty folder name")
+            self.cache_dir = Path(cache_root) / namespace
             self.cache_dir.mkdir(parents=True, exist_ok=True)
         # calls/prompt_tokens/completion_tokens/cache_hits: LOGICAL accounting (cache-independent). Do not change
         # their meaning: Run 1 cost figures are computed from them.
@@ -89,7 +100,7 @@ class LLMClient:
         self.stats = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "cache_hits": 0,
                       "cache_misses": 0, "provider_calls": 0, "retry_attempts": 0,
                       "rate_limit_errors": 0, "connection_errors": 0, "rate_limit_stops": 0,
-                      "empty_completions": 0,
+                      "empty_completions": 0, "cache_corruptions": 0,
                       "provider_prompt_tokens": 0, "provider_completion_tokens": 0}
 
     def snapshot(self) -> dict:
@@ -108,11 +119,25 @@ class LLMClient:
         if self.cache_dir is not None:
             path = self.cache_dir / f"{self._key(model, messages, temperature, max_tokens, effort, headroom)}.json"
             if path.exists():
-                hit = json.loads(path.read_text(encoding="utf-8"))
-                self.stats["cache_hits"] += 1
-                self.stats["prompt_tokens"] += hit["prompt_tokens"]
-                self.stats["completion_tokens"] += hit["completion_tokens"]
-                return hit["text"]
+                try:
+                    hit = json.loads(path.read_text(encoding="utf-8"))
+                    if not isinstance(hit, dict) or not isinstance(hit.get("text"), str) or not hit["text"].strip():
+                        raise ValueError("invalid cached response shape")
+                    pt, ct = int(hit["prompt_tokens"]), int(hit["completion_tokens"])
+                    if pt < 0 or ct < 0:
+                        raise ValueError("negative cached token count")
+                except (OSError, ValueError, TypeError, KeyError):
+                    # A torn/manual cache file must not permanently break the same prompt.
+                    self.stats["cache_corruptions"] += 1
+                    try:
+                        path.unlink()
+                    except OSError:
+                        pass
+                else:
+                    self.stats["cache_hits"] += 1
+                    self.stats["prompt_tokens"] += pt
+                    self.stats["completion_tokens"] += ct
+                    return hit["text"]
 
         from openai import RateLimitError, APIConnectionError
 
@@ -131,11 +156,13 @@ class LLMClient:
             kwargs = {}
             if effort:
                 kwargs["extra_body"] = {"reasoning_effort": effort}
+            # Pace every provider attempt, including failed 429/connection attempts.
+            # Otherwise an error followed by a quick retry can bypass the RPM guard.
+            self._last_provider_request_at = time.monotonic()
             try:
                 response = self.client.chat.completions.create(
                     model=model, messages=messages, temperature=temperature,
                     max_tokens=max_tokens + headroom, **kwargs)
-                self._last_provider_request_at = time.monotonic()
                 return response
             except RateLimitError:
                 self.stats["rate_limit_errors"] += 1
@@ -155,17 +182,23 @@ class LLMClient:
         except LLMRateLimitExceeded:
             self.stats["rate_limit_stops"] += 1
             raise
-        # quota actually consumed, counted even if the completion turns out empty
-        self.stats["provider_prompt_tokens"] += getattr(r.usage, "prompt_tokens", 0) or 0
-        self.stats["provider_completion_tokens"] += getattr(r.usage, "completion_tokens", 0) or 0
-        text = r.choices[0].message.content or ""
+        # Quota consumed is counted even if the completion turns out empty.
+        usage = getattr(r, "usage", None)
+        self.stats["provider_prompt_tokens"] += getattr(usage, "prompt_tokens", 0) or 0
+        self.stats["provider_completion_tokens"] += getattr(usage, "completion_tokens", 0) or 0
+        choices = getattr(r, "choices", None)
+        if not choices:
+            self.stats["empty_completions"] += 1
+            raise LLMEmptyCompletion(f"empty completion from {model} (provider returned no choices)")
+        choice = choices[0]
+        text = getattr(getattr(choice, "message", None), "content", None) or ""
         if not text.strip():
             self.stats["empty_completions"] += 1
-            raise RuntimeError(
-                f"empty completion from {model} (finish_reason={r.choices[0].finish_reason}). "
+            raise LLMEmptyCompletion(
+                f"empty completion from {model} (finish_reason={getattr(choice, 'finish_reason', None)}). "
                 "If 'length': raise llm.token_headroom in the config; reasoning models spend tokens thinking.")
-        pt = getattr(r.usage, "prompt_tokens", 0) or 0
-        ct = getattr(r.usage, "completion_tokens", 0) or 0
+        pt = getattr(usage, "prompt_tokens", 0) or 0
+        ct = getattr(usage, "completion_tokens", 0) or 0
         self.stats["prompt_tokens"] += pt
         self.stats["completion_tokens"] += ct
         if path is not None:

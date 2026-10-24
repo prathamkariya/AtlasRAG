@@ -14,6 +14,7 @@ Survivors are still candidates until human review accepts them.
 from __future__ import annotations
 import json
 import re
+import unicodedata
 from collections import Counter
 from dataclasses import dataclass
 
@@ -22,7 +23,7 @@ import numpy as np
 from .generate import Generator, COMMON, TASKS, EVIDENCE_SECT
 from .schema import Question, make_id, paper_split
 from .validate import judge_support, verdict
-from ..llm import LLMRateLimitExceeded
+from ..llm import LLMEmptyCompletion, LLMRateLimitExceeded
 
 STRUCTURED_TASKS = {
     "multi_hop": """Use BOTH passages in a genuinely joint question. Identify one substantive contribution from each passage and make the reference answer depend on both. If either passage is merely background, or if no joint question is possible, reply {\"question\":\"NONE\"}.""",
@@ -58,33 +59,89 @@ class PairAssessment:
     shared_signals: frozenset[str] = frozenset()
 
 
+# Canonical names let Greek glyphs, LaTeX names, and plain-text parameter aliases
+# intersect without making broad topical words count as specific scientific anchors.
+_GREEK_NAMES = {
+    "Α": "alpha", "α": "alpha", "Β": "beta", "β": "beta",
+    "Γ": "gamma", "γ": "gamma", "Δ": "delta", "δ": "delta",
+    "Ε": "epsilon", "ε": "epsilon", "Ζ": "zeta", "ζ": "zeta",
+    "Η": "eta", "η": "eta", "Θ": "theta", "θ": "theta", "ϑ": "theta",
+    "Ι": "iota", "ι": "iota", "Κ": "kappa", "κ": "kappa",
+    "Λ": "lambda", "λ": "lambda", "Μ": "mu", "μ": "mu",
+    "Ν": "nu", "ν": "nu", "Ξ": "xi", "ξ": "xi",
+    "Ο": "omicron", "ο": "omicron", "Π": "pi", "π": "pi", "ϖ": "pi",
+    "Ρ": "rho", "ρ": "rho", "ϱ": "rho", "Σ": "sigma", "σ": "sigma", "ς": "sigma",
+    "Τ": "tau", "τ": "tau", "Υ": "upsilon", "υ": "upsilon",
+    "Φ": "phi", "φ": "phi", "ϕ": "phi", "Χ": "chi", "χ": "chi",
+    "Ψ": "psi", "ψ": "psi", "Ω": "omega", "ω": "omega",
+}
+_GREEK_CLASS = re.escape("".join(_GREEK_NAMES))
+_LATEX_GREEK = re.compile(
+    r"\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)\b",
+    re.I,
+)
+_GREEK_WITH_SUFFIX = re.compile(r"([" + _GREEK_CLASS + r"])_?([A-Za-z]+|[0-9]+)")
+_PARAMETER_NAME = re.compile(
+    r"\b(?:alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)_[A-Za-z0-9]+\b",
+    re.I,
+)
+_SPECIFIC_PATTERNS = (
+    r"\b[A-Z]{2,}[A-Za-z0-9_+\-]*\b",  # DESI, BAO, CMB, FLRW
+    r"\b[A-Za-z]+\d+[A-Za-z0-9_+\-]*\b",  # H0, Neff1, sigma8
+    r"\b[a-z][A-Z][A-Za-z0-9_+\-]*\b",  # wCDM, mH
+    r"\b[A-Za-z]{1,2}_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)?\b",  # n_s, S_8, D_M, f_sigma_8
+    r"\bN_eff\b|\bNeff\b",  # effective neutrino count spellings
+)
+
+
+def _canonicalize_scientific_text(text: str) -> str:
+    """Normalize Unicode subscripts, Greek parameters and common LaTeX aliases."""
+    text = unicodedata.normalize("NFKC", text)
+    text = _LATEX_GREEK.sub(lambda m: m.group(1).lower(), text)
+    # Keep a Latin prefix separate from a Greek variable (fσ8 -> f_σ8).
+    text = re.sub(r"([A-Za-z])([" + _GREEK_CLASS + r"])", r"\1_\2", text)
+
+    def greek_parameter(match: re.Match[str]) -> str:
+        name = _GREEK_NAMES[match.group(1)]
+        suffix = match.group(2).lower()
+        return f"{name}_{suffix}"
+
+    text = _GREEK_WITH_SUFFIX.sub(greek_parameter, text)
+    # A free-standing Greek symbol is useful as a general signal, but is not a
+    # specific anchor unless it has a parameter/model suffix.
+    text = re.sub(r"([" + _GREEK_CLASS + r"])", lambda m: _GREEK_NAMES[m.group(1)], text)
+    return text
+
+
+def _extract_specific_anchors(normalized_text: str) -> set[str]:
+    anchors = {
+        match.lower()
+        for pattern in _SPECIFIC_PATTERNS
+        for match in re.findall(pattern, normalized_text)
+    }
+    anchors.update(match.lower() for match in _PARAMETER_NAME.findall(normalized_text))
+    return anchors
+
+
 def scientific_signals(text: str) -> set[str]:
-    """Extract conservative lexical/entity signals without a corpus-specific lexicon."""
-    words = re.findall(r"[A-Za-z][A-Za-z0-9_+\-]*", text)
+    """Extract normalized scientific terms and parameter tokens for candidate pairing."""
+    normalized = _canonicalize_scientific_text(text)
+    words = re.findall(r"[A-Za-z][A-Za-z0-9_+\-]*", normalized)
     out = set()
     for word in words:
         low = word.lower()
-        is_parameter = bool(re.fullmatch(r"[a-zA-Z][0-9]+", word))
+        is_parameter = bool(re.fullmatch(
+            r"[A-Za-z][0-9]+|[A-Za-z]{1,2}_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)?", word))
         is_acronym = len(word) >= 2 and word.isupper()
         if (len(low) >= 4 or is_parameter or is_acronym) and low not in _NON_SCIENTIFIC_TERMS:
             out.add(low)
+    out.update(_extract_specific_anchors(normalized))
     return out
 
 
 def specific_scientific_signals(text: str) -> set[str]:
-    """Extract high-precision scientific anchors, including named parameters."""
-    patterns = (
-        r"\b[A-Z]{2,}[A-Za-z0-9_+\-]*\b",          # DESI, BAO, FLRW
-        r"\b[A-Za-z]+\d+[A-Za-z0-9_+\-]*\b",      # H0, Neff
-        r"\b[a-z][A-Z][A-Za-z0-9_+\-]*\b",         # mH, wCDM
-        r"[\u03a9\u039b\u0394\u03be][A-Za-z0-9_+\-]+",  # Greek scientific symbols
-        r"\b(?:omega|Omega|OMEGA|delta|Delta|DELTA|lambda|Lambda|LAMBDA|xi|Xi|XI)_[A-Za-z0-9]+\b",
-    )
-    return {
-        match.lower()
-        for pattern in patterns
-        for match in re.findall(pattern, text)
-    }
+    """Extract high-precision scientific anchors, including Unicode/LaTeX parameters."""
+    return _extract_specific_anchors(_canonicalize_scientific_text(text))
 
 
 def _signal_similarity(a: str, b: str) -> float:
@@ -121,8 +178,11 @@ def assess_cross_paper_pair(passage_a: str, passage_b: str, *, qtype: str,
             return PairAssessment(reason="temporal_weak_section", shared_signals=frozenset(shared))
         if not _has_temporal_evidence(passage_a) or not _has_temporal_evidence(passage_b):
             return PairAssessment(reason="temporal_no_update_signal", shared_signals=frozenset(shared))
+    specific_shared = specific_scientific_signals(passage_a) & specific_scientific_signals(passage_b)
     complementarity = min(len(signals_a - shared), len(signals_b - shared))
-    score = (3.0 * len(shared)) + min(complementarity, 6) + max(dense_similarity, 0.0)
+    # Shared named parameters carry more pairing value than generic lexical overlap.
+    score = (8.0 * len(specific_shared)) + (2.0 * len(shared - specific_shared)) \
+            + min(complementarity, 6) + max(dense_similarity, 0.0)
     return PairAssessment(score=score, shared_signals=frozenset(shared))
 
 
@@ -159,6 +219,8 @@ def _parse_structured(text: str):
     try:
         d = json.loads(m.group(0))
     except json.JSONDecodeError:
+        return None
+    if not isinstance(d, dict):
         return None
     q = str(d.get("question", "")).strip()
     if len(q) < 15 or q.upper().startswith("NONE"):
@@ -267,6 +329,10 @@ class ValidatedGenerator(Generator):
                 **({"token_headroom": self.generation_token_headroom}
                    if getattr(self, "generation_token_headroom", None) is not None else {}),
             )
+        except LLMEmptyCompletion as exc:
+            print(f"[empty completion] {exc}")
+            self.vstats["generation_empty_completions"] += 1
+            return None
         except LLMRateLimitExceeded as exc:
             print(f"[rate limit detail] {exc}")
             self.vstats["rate_limited"] += 1
@@ -300,6 +366,10 @@ class ValidatedGenerator(Generator):
     def _judge(self, question: str, reference: str, passages: list[str]):
         try:
             return judge_support(self.llm, question, reference, passages, model=self.judge_model or self.model)
+        except LLMEmptyCompletion as exc:
+            print(f"[empty judge completion] {exc}")
+            self.vstats["judge_empty_completions"] += 1
+            return None
         except LLMRateLimitExceeded as exc:
             print(f"[rate limit detail] {exc}")
             self.vstats["rate_limited"] += 1

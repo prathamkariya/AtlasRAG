@@ -42,9 +42,10 @@ def fetch_papers(categories, keywords, max_papers, date_from, raw_dir, delay=3.0
         sort_by=arxiv.SortCriterion.SubmittedDate if sort == "date" else arxiv.SortCriterion.Relevance,
     )
     kept = 0
+    lower_date = date_from or "1991-01-01"
     for r in client.results(search):
         pub = r.published.strftime("%Y-%m-%d")
-        if pub < date_from:
+        if pub < lower_date:
             if sort == "date":
                 break                      # newest-first: everything after this is older still
             continue                       # relevance order is not chronological

@@ -6,13 +6,19 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
       # Light dependencies only: tests use fakes, so no torch / sentence-transformers download.
-      - run: pip install numpy pyyaml python-dotenv rank-bm25 pytest openai httpx tqdm pymupdf requests arxiv
+      - run: pip install numpy pyyaml python-dotenv rank-bm25 pytest openai httpx tqdm pymupdf requests arxiv fastapi pydantic ruff
+      - run: python -m compileall -q src scripts tests
+      - run: ruff check --select F src scripts tests
       - run: PYTHONPATH=src python -m pytest -q
       - name: committed corpus matches its manifest (skipped until a manifest exists)
         run: |

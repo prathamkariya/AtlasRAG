@@ -1,4 +1,4 @@
-import argparse, json, sys
+import argparse, json, os, sys, tempfile
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -26,11 +26,25 @@ if failed and not a.allow_missing:
     sys.exit(f"ABORT: {len(failed)} of {len(records)} papers could not be parsed. NOTHING was written (existing chunks.jsonl and "
              f"index are untouched). Fix the cause (usually: python scripts\\refetch_pdfs.py), or pass --allow-missing if you really want a partial corpus.")
 
-proc.mkdir(parents=True, exist_ok=True)
-with open(proc / "chunks.jsonl", "w", encoding="utf-8") as f:
-    for c in all_chunks:
-        f.write(json.dumps(c) + "\n")
-
+# Build/validate the new retrieval index before publishing processed chunks.
+# If embedding or index validation fails, leave the previous processed chunks intact.
 emb = Embedder(cfg["embedding"]["model"], cfg["embedding"]["query_prefix"])
 Index.build(all_chunks, emb, resolve(cfg["retrieval"]["index_dir"]))
+
+proc.mkdir(parents=True, exist_ok=True)
+fd, temp_name = tempfile.mkstemp(prefix=".chunks.jsonl.", suffix=".tmp", dir=proc)
+try:
+    with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
+        for c in all_chunks:
+            f.write(json.dumps(c, ensure_ascii=False) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(temp_name, proc / "chunks.jsonl")
+except BaseException:
+    try:
+        os.unlink(temp_name)
+    except OSError:
+        pass
+    raise
+
 print("index written to", resolve(cfg["retrieval"]["index_dir"]))

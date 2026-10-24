@@ -240,7 +240,8 @@ def test_interactive_review_shows_passages_without_an_index_and_records_a_human_
     monkeypatch.setenv("ATLAS_CONFIG", str(tmp_path / "cfg.yaml"))
     answers = iter(["a", "r"])
     monkeypatch.setattr(builtins, "input", lambda *a, **k: next(answers))
-    monkeypatch.setattr(sys, "argv", ["review_questions.py", "--file", str(tmp_path / "q.jsonl"), "--split", "test"])
+    monkeypatch.setattr(sys, "argv", ["review_questions.py", "--config", str(tmp_path / "cfg.yaml"),
+                                        "--file", str(tmp_path / "q.jsonl"), "--split", "test"])
     try:
         runpy.run_path(str(ROOT / "scripts" / "review_questions.py"), run_name="__main__")
     except SystemExit:

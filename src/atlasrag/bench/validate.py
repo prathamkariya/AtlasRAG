@@ -41,9 +41,10 @@ def parse_json(text: str) -> dict:
         return {}
     raw = re.sub(r"//[^\n]*", "", m.group(0))
     try:
-        return json.loads(raw)
+        value = json.loads(raw)
     except json.JSONDecodeError:
         return {}
+    return value if isinstance(value, dict) else {}
 
 
 def judge_support(llm, question: str, reference: str, passages: list[str], model: str | None = None) -> dict:

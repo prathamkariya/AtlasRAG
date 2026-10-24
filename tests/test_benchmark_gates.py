@@ -9,7 +9,7 @@ import pytest
 from atlasrag.bench.schema import Question, save_questions, load_questions
 from atlasrag.bench.review_meta import mark_review, review_mode
 from atlasrag.bench.finalize import (finalize, gate_reasons, build_manifest, parse_minimums, check_minimums,
-                                     norm_q, sha_text_bytes)
+                                     norm_q)
 from atlasrag.bench.audit_stability import validation_run, collect, classify
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -225,3 +225,12 @@ def test_different_seeds_give_different_attempt_streams():
     same = ValidatedGenerator(ix, _JsonLLM(), {}, seed=1)
     pick = lambda g: [g.rng.choice(g.pool["test"]) for _ in range(12)]
     assert pick(a) == pick(same) and pick(a) != pick(b)
+
+
+def test_finalize_tolerates_valid_non_object_validation_json():
+    q = Q(500)
+    q.validation = "[]"
+    reasons = gate_reasons(q, {"q500": dict(GOOD)})
+    assert "no_judge_model_recorded" in reasons
+    manifest = build_manifest("malformed-validation", [q], {}, "hash")
+    assert manifest["generator_models"] == [] and manifest["judge_models"] == []

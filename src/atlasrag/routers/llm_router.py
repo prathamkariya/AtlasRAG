@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import math
 import re
 from .base import Router, RouteDecision, LABELS
 
@@ -25,9 +26,11 @@ class LLMRouter(Router):
         m = re.search(r"\{.*\}", out, re.S)
         try:
             d = json.loads(m.group(0)) if m else {}
+            if not isinstance(d, dict):
+                raise ValueError("expected a JSON object")
             label = str(d.get("label", "")).upper()
             conf = float(d.get("confidence", 0.0))
-            if label not in LABELS:
+            if label not in LABELS or not math.isfinite(conf):
                 raise ValueError(label)
             return RouteDecision(label, max(0.0, min(1.0, conf)), self.name)
         except (ValueError, TypeError):
