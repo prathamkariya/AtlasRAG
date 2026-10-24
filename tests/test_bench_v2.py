@@ -16,7 +16,7 @@ from atlasrag.bench.generate_v2 import (
 )
 from atlasrag.bench.oracle_v2 import derive_oracle_v2, training_pairs
 from atlasrag.bench.diagnostics import diagnose, to_markdown
-from atlasrag.llm import LLMRateLimitExceeded, run_with_bounded_retries
+from atlasrag.llm import LLMEmptyCompletion, LLMRateLimitExceeded, run_with_bounded_retries
 from atlasrag.retrieval.index import Index
 from atlasrag.bench.experiments import make_router
 
@@ -373,3 +373,17 @@ def test_e2_router_uses_v2_labels():
     q = Q(1, ["g"], "UNCERTAIN"); q.gold_route_v2 = "SIMPLE"
     assert make_router("E", {}, None, [q]).route(q.question).label == "UNCERTAIN"
     assert make_router("E2", {}, None, [q]).route(q.question).label == "SIMPLE"
+
+
+def test_empty_generator_and_judge_completions_become_counted_failed_attempts():
+    class EmptyLLM:
+        def chat(self, *args, **kwargs):
+            raise LLMEmptyCompletion("empty completion from test model (finish_reason=length)")
+
+    g = ValidatedGenerator(small_index(), EmptyLLM(), {}, seed=1)
+    assert g._ask("simple task", "passage text") is None
+    assert g.vstats["generation_empty_completions"] == 1
+    assert g._ask_structured("multi_hop", "two passages") is None
+    assert g.vstats["generation_empty_completions"] == 2
+    assert g._judge("question?", "answer", ["passage"]) is None
+    assert g.vstats["judge_empty_completions"] == 1

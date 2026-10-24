@@ -2,7 +2,7 @@ import types
 import pytest
 
 pytest.importorskip("openai")
-from atlasrag.llm import LLMClient
+from atlasrag.llm import LLMClient, LLMEmptyCompletion
 
 
 def _resp(text, finish="stop"):
@@ -71,3 +71,22 @@ def test_paces_only_second_uncached_provider_request(tmp_path, monkeypatch):
     clock[0] = 11.0
     llm.chat([{"role": "user", "content": "second"}])
     assert sleeps == [pytest.approx(1.1)]
+
+
+def test_corrupt_cache_is_evicted_and_regenerated(tmp_path, monkeypatch):
+    llm = make(tmp_path, monkeypatch)
+    messages = [{"role": "user", "content": "recover a corrupt cache"}]
+    llm.chat(messages)
+    cached = next((tmp_path / "t").glob("*.json"))
+    cached.write_text("{not-json", encoding="utf-8")
+    assert llm.chat(messages) == "hello"
+    assert len(llm.client.calls) == 2
+    assert llm.stats["cache_corruptions"] == 1
+    assert llm.stats["cache_hits"] == 0
+
+
+def test_empty_completion_uses_a_specific_recoverable_exception(tmp_path, monkeypatch):
+    llm = make(tmp_path, monkeypatch)
+    llm.client = FakeAPI(text="", finish="length")
+    with pytest.raises(LLMEmptyCompletion, match="token_headroom"):
+        llm.chat([{"role": "user", "content": "hi"}])

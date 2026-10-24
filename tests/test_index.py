@@ -30,3 +30,17 @@ def test_pdf_roundtrip(tmp_path):
     doc.save(str(p))
     names = [n for n, _ in split_sections(extract_text(p))]
     assert "Introduction" in names and "Methods" in names
+
+
+def test_index_rejects_empty_or_misaligned_embeddings():
+    chunks = [{"chunk_id": "p::0", "paper_id": "p", "title": "T", "section": "S", "text": "some text"}]
+    with pytest.raises(ValueError, match="count mismatch"):
+        Index(chunks, np.zeros((0, 3), dtype="float32"))
+    with pytest.raises(ValueError, match="empty retrieval index"):
+        Index([], np.zeros((0, 3), dtype="float32"))
+
+
+def test_topk_handles_zero_and_empty_inputs():
+    from atlasrag.retrieval.index import _topk
+    assert _topk(np.array([1.0, 2.0]), 0) == []
+    assert _topk(np.array([], dtype="float32"), 5) == []
