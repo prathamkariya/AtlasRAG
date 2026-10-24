@@ -26,7 +26,7 @@ def test_unicode_latex_and_plain_parameter_aliases_normalize_to_the_same_anchor(
         ("fσ8", "f_sigma_8", "f_sigma8"),
         ("H₀", "H0", "h0"),
         ("n_s", "n_s", "n_s"),
-        ("S_8", "S_8", "s_8"),
+        ("S_8", "S_8", "s8"),
         ("ΔNeff", "delta_neff", "delta_neff"),
     ]
     for unicode_or_latex, plain, canonical in pairs:
