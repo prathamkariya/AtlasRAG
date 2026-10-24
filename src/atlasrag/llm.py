@@ -114,7 +114,7 @@ class LLMClient:
             if path.exists():
                 try:
                     hit = json.loads(path.read_text(encoding="utf-8"))
-                    if not isinstance(hit, dict) or not isinstance(hit.get("text"), str):
+                    if not isinstance(hit, dict) or not isinstance(hit.get("text"), str) or not hit["text"].strip():
                         raise ValueError("invalid cached response shape")
                     pt, ct = int(hit["prompt_tokens"]), int(hit["completion_tokens"])
                     if pt < 0 or ct < 0:

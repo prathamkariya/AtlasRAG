@@ -90,3 +90,14 @@ def test_empty_completion_uses_a_specific_recoverable_exception(tmp_path, monkey
     llm.client = FakeAPI(text="", finish="length")
     with pytest.raises(LLMEmptyCompletion, match="token_headroom"):
         llm.chat([{"role": "user", "content": "hi"}])
+
+
+def test_empty_text_in_valid_cache_is_evicted_and_regenerated(tmp_path, monkeypatch):
+    llm = make(tmp_path, monkeypatch)
+    messages = [{"role": "user", "content": "recover empty cached text"}]
+    llm.chat(messages)
+    cached = next((tmp_path / "t").glob("*.json"))
+    cached.write_text('{"text":"","prompt_tokens":7,"completion_tokens":3}', encoding="utf-8")
+    assert llm.chat(messages) == "hello"
+    assert len(llm.client.calls) == 2
+    assert llm.stats["cache_corruptions"] == 1

@@ -86,11 +86,6 @@ def quota_exhausted(summary: dict[str, Any]) -> bool:
     return any(p in blob for p in quota_phrases)
 
 
-def latest_summary(summary_path: Path) -> dict[str, Any] | None:
-    rows = read_jsonl(summary_path)
-    return rows[-1] if rows else None
-
-
 def is_rate_limit_stop(exit_code: int, prior_summary_count: int, summary_path: Path) -> bool:
     """Exit code 2 is rate limiting only when this child appended that exact stop record."""
     if exit_code != 2:
