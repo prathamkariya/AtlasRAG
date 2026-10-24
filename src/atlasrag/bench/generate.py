@@ -14,6 +14,7 @@ import re
 import numpy as np
 
 from .schema import Question, make_id, paper_split
+from ..llm import LLMEmptyCompletion
 
 SKIP_SECTIONS = {"Front matter"}
 EVIDENCE_SECT = re.compile(r"result|method|data|observ|analys|discussion|measure|conclusion", re.I)
@@ -54,6 +55,8 @@ def parse_qa(text: str):
     try:
         d = json.loads(m.group(0))
     except json.JSONDecodeError:
+        return None
+    if not isinstance(d, dict):
         return None
     q, a = str(d.get("question", "")).strip(), str(d.get("reference_answer", "")).strip()
     if len(q) < 15 or q.upper().startswith("NONE") or not a:
@@ -98,10 +101,16 @@ class Generator:
             call_options["reasoning_effort"] = effort
         if headroom is not None:
             call_options["token_headroom"] = headroom
-        out = self.llm.chat([{"role": "system", "content": COMMON + " " + task},
-                             {"role": "user", "content": body}],
-                            temperature=0.3, max_tokens=600, model=self.model,
-                            **call_options)
+        try:
+            out = self.llm.chat([{"role": "system", "content": COMMON + " " + task},
+                                 {"role": "user", "content": body}],
+                                temperature=0.3, max_tokens=600, model=self.model,
+                                **call_options)
+        except LLMEmptyCompletion as exc:
+            print(f"[empty completion] {exc}")
+            if hasattr(self, "vstats"):
+                self.vstats["generation_empty_completions"] += 1
+            return None
         return parse_qa(out)
 
     def make(self, qtype: str, split: str):

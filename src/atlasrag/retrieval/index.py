@@ -14,6 +14,8 @@ def tokenize(t: str) -> list[str]:
 
 
 def _topk(scores: np.ndarray, k: int) -> list[tuple[int, float]]:
+    if k <= 0 or scores.size == 0:
+        return []
     k = min(k, len(scores))
     top = np.argpartition(-scores, k - 1)[:k]
     top = top[np.argsort(-scores[top])]
@@ -25,11 +27,23 @@ class Index:
     keeps Week 1 dependency-light; swap for pgvector later if needed."""
 
     def __init__(self, chunks: list[dict], emb: np.ndarray):
+        emb = np.asarray(emb)
+        if not chunks:
+            raise ValueError("cannot initialize an empty retrieval index")
+        if emb.ndim != 2:
+            raise ValueError(f"index embeddings must be a 2D matrix; got shape {emb.shape}")
+        if emb.shape[0] != len(chunks):
+            raise ValueError(
+                f"index chunk/embedding count mismatch: {len(chunks)} chunks, {emb.shape[0]} vectors")
+        if emb.shape[1] == 0:
+            raise ValueError("index embeddings have zero dimensions")
         self.chunks, self.emb = chunks, emb
         self._bm25 = BM25Okapi([tokenize(c["text"]) for c in chunks])
 
     @classmethod
     def build(cls, chunks, embedder, index_dir) -> "Index":
+        if not chunks:
+            raise ValueError("cannot build an index with no chunks")
         index_dir = Path(index_dir)
         index_dir.mkdir(parents=True, exist_ok=True)
         texts = [f'{c["title"]} - {c["section"]}\n{c["text"]}' for c in chunks]

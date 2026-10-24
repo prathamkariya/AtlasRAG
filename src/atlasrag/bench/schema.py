@@ -1,7 +1,9 @@
 from __future__ import annotations
 import hashlib
 import json
-from dataclasses import dataclass, field, asdict
+import os
+import tempfile
+from dataclasses import dataclass, asdict
 from pathlib import Path
 
 QTYPES = ("simple", "multi_hop", "conflicting", "temporal", "chain")
@@ -47,11 +49,23 @@ def load_questions(path, status: str | None = None, split: str | None = None) ->
 
 
 def save_questions(path, qs: list[Question]) -> None:
+    """Atomically replace the JSONL so interruption cannot truncate saved progress."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        for q in qs:
-            f.write(json.dumps(asdict(q)) + "\n")
+    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
+            for q in qs:
+                f.write(json.dumps(asdict(q), ensure_ascii=False) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temp_name, path)
+    except BaseException:
+        try:
+            os.unlink(temp_name)
+        except OSError:
+            pass
+        raise
 
 
 def make_id(qtype: str, question: str) -> str:
