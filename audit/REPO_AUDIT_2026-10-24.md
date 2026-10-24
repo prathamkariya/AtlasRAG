@@ -10,7 +10,7 @@ Reviewed the pushed main tree at `f4cd074d40234ed6e032a842a65f25b776d1287f`, rec
 2. **Scientific anchors missed equivalent notation.** Greek glyphs, Unicode subscripts, LaTeX parameter names and plain-text aliases did not consistently intersect (e.g. `Ω_m` / `Omega_m` / `\Omega_m`, `σ₈` / `sigma_8`, `fσ8` / `f_sigma_8`, `H₀` / `H0`). Pair acceptance thresholds remain strict; canonicalization and ranking are improved, with alias regression tests.
 3. **A blank/truncated completion could crash a generation run.** Empty provider responses now use a dedicated `LLMEmptyCompletion` exception. Expected empty generation/judge completions become counted failed attempts; unexpected programming errors still propagate. Corrupt cache JSON is evicted and regenerated instead of aborting the same prompt.
 4. **The unattended runner could confuse CLI errors with rate limits.** Both argparse errors and rate-limit stops can use exit code 2. Cooldown is now attempted only when the child appended a new run record whose stop reason is `rate_limited`. Quota checks use fresh records from the child invocation.
-5. **Candidate counts and language were misleading.** The automatic pipeline creates audited `candidate` rows; it does not human-accept benchmark records. Resume targets count candidates only, and status messages/docs now call them audited candidates.
+5. **Candidate counts and language were misleading.** The generator emits `candidate` rows, but a question later marked `accepted` must continue to count toward the target while `rejected` rows must not. Resume logic counts `candidate` plus `accepted` rows and excludes `rejected` rows; status messages distinguish automated audit from human review.
 6. **Saved progress could be truncated on interruption.** Question JSONL writes now go through a same-directory temporary file and atomic replace.
 7. **Index invariants failed late and opaquely.** Empty indexes, non-2D embeddings, row-count mismatches and zero-dimensional vectors now fail early with actionable `ValueError`s; top-k returns an empty list for empty score arrays or `k <= 0`.
 8. **Relative config paths depended on the current directory.** `load_config()` resolves relative paths from the project root and validates that the YAML root and `llm` section have the expected structure. Both `show_questions.py` and interactive `review_questions.py` accept `--config`, so corpus-v2 evidence is resolved against the matching corpus/index.
@@ -35,7 +35,7 @@ Reviewed the pushed main tree at `f4cd074d40234ed6e032a842a65f25b776d1287f`, rec
 
 ## Verification
 
-The branch adds tests for parameter normalization, empty completion handling, corrupted-cache recovery, resume target accounting, invalid-exit classification, index input validation, and `date_from=None`. Use the pull-request check result before merging; this report intentionally does not pre-claim those checks passed.
+The branch adds tests for parameter normalization, empty completion handling, corrupted-cache recovery and cache-namespace isolation, resume target accounting, invalid-exit classification, index input validation, API readiness and `date_from=None`. At the latest completed run (`c5d90c3a28840b0ac0609637f72d99e14cc14fec`), CI passed on Python 3.11 and 3.12 with 159 tests each. A newer change teaches the runner to count human-approved rows toward its target and adds a Ruff undefined/unused-name pass; its check result is pending.
 
 ### Follow-up findings (after the initial CI-green pass)
 
