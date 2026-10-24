@@ -34,9 +34,9 @@ Index.build(all_chunks, emb, resolve(cfg["retrieval"]["index_dir"]))
 proc.mkdir(parents=True, exist_ok=True)
 fd, temp_name = tempfile.mkstemp(prefix=".chunks.jsonl.", suffix=".tmp", dir=proc)
 try:
-    with os.fdopen(fd, "w", encoding="utf-8", newline="\\n") as f:
+    with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
         for c in all_chunks:
-            f.write(json.dumps(c, ensure_ascii=False) + "\\n")
+            f.write(json.dumps(c, ensure_ascii=False) + "\n")
         f.flush()
         os.fsync(f.fileno())
     os.replace(temp_name, proc / "chunks.jsonl")
