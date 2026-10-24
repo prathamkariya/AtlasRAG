@@ -5,6 +5,7 @@ __pycache__/
 *.pyo
 *.bak
 *.log
+*.tmp
 
 # PDFs, indexes and embeddings are rebuilt from metadata.jsonl / chunks.jsonl (see scripts/refetch_pdfs.py,
 # scripts/rebuild_index_from_chunks.py); they never go in Git.

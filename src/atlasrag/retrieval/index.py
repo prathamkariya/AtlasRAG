@@ -48,11 +48,14 @@ class Index:
         index_dir.mkdir(parents=True, exist_ok=True)
         texts = [f'{c["title"]} - {c["section"]}\n{c["text"]}' for c in chunks]
         emb = embedder.encode_docs(texts)
-        np.save(index_dir / "emb.npy", emb)
+        # Validate before touching the existing index files. A bad encoder result
+        # must not replace a previously usable index with partial/corrupt artifacts.
+        index = cls(chunks, emb)
+        np.save(index_dir / "emb.npy", index.emb)
         with open(index_dir / "chunks.jsonl", "w", encoding="utf-8") as f:
             for c in chunks:
                 f.write(json.dumps(c) + "\n")
-        return cls(chunks, emb)
+        return index
 
     @classmethod
     def load(cls, index_dir) -> "Index":

@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from .. import __version__
 from ..config import load_config, resolve
 from ..pipeline import Pipeline
+from ..llm import LLMEmptyCompletion, LLMRateLimitExceeded
 from ..routers import build_router, AVAILABLE_NOW
 
 _state: dict = {"pipeline": None, "cfg": None, "llm": None, "notes": []}
@@ -47,8 +48,12 @@ class AskRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": __version__,
-            "pipeline_ready": _state["pipeline"] is not None, "notes": _state["notes"]}
+    payload = {"status": "ok", "version": __version__,
+               "pipeline_ready": _state["pipeline"] is not None, "notes": _state["notes"]}
+    if not payload["pipeline_ready"]:
+        payload["status"] = "not_ready"
+        raise HTTPException(status_code=503, detail=payload)
+    return payload
 
 
 @app.get("/routers")
@@ -63,5 +68,10 @@ def ask(req: AskRequest):
     if req.router not in AVAILABLE_NOW:
         raise HTTPException(400, detail=f"router must be one of {AVAILABLE_NOW}")
     router = build_router(req.router, _state["cfg"], llm=_state["llm"])
-    with _lock:
-        return _state["pipeline"].answer(req.question, router)
+    try:
+        with _lock:
+            return _state["pipeline"].answer(req.question, router)
+    except (LLMEmptyCompletion, LLMRateLimitExceeded) as exc:
+        # Provider throttling/empty output is a retryable service condition, not
+        # an opaque 500 that makes clients misclassify AtlasRAG as broken.
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

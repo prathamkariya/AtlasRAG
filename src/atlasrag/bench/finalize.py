@@ -61,7 +61,9 @@ def gate_reasons(q, stability: dict, require_runs: int = 3, require_human: bool 
             r.append("chain_must_be_single_paper")
     try:
         v = json.loads(q.validation) if q.validation else {}
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypeError):
+        v = {}
+    if not isinstance(v, dict):
         v = {}
     if v.get("judge_model") in INVALID_MODEL_NAMES:
         r.append("no_judge_model_recorded")
@@ -113,7 +115,9 @@ def build_manifest(benchmark_id, final, rejected, questions_sha256, corpus_manif
     for q in final:
         try:
             v = json.loads(q.validation)
-        except Exception:
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(v, dict):
             continue
         gm, jm = v.get("generator_model", "?"), v.get("judge_model", "?")
         models["generator"].add(gm); models["judge"].add(jm)
