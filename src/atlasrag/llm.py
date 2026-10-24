@@ -87,7 +87,8 @@ class LLMClient:
         if cache_root is not None:
             # Use an environment override for isolated runs; never silently mix
             # new generation/stability output into the tracked Run 1 cache.
-            namespace = os.getenv("ATLAS_CACHE_NAMESPACE") or cfg.get("cache_namespace", "default")
+            namespace_override = os.getenv("ATLAS_CACHE_NAMESPACE")
+            namespace = namespace_override if namespace_override is not None else cfg.get("cache_namespace", "default")
             if (not isinstance(namespace, str) or not namespace.strip()
                     or namespace in {".", ".."} or "/" in namespace or "\\" in namespace):
                 raise ValueError("ATLAS_CACHE_NAMESPACE / llm.cache_namespace must be a single non-empty folder name")
