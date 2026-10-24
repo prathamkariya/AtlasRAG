@@ -6,7 +6,7 @@ import pytest
 
 pytest.importorskip("rank_bm25")
 from atlasrag.bench.schema import Question, load_questions, paper_split, save_questions
-from atlasrag.bench.validate import parse_json, verdict, judge_support
+from atlasrag.bench.validate import parse_json, verdict
 from atlasrag.bench.generate_v2 import (
     ValidatedGenerator,
     assess_chain_pair,

@@ -9,7 +9,7 @@ import pytest
 from atlasrag.bench.schema import Question, save_questions, load_questions
 from atlasrag.bench.review_meta import mark_review, review_mode
 from atlasrag.bench.finalize import (finalize, gate_reasons, build_manifest, parse_minimums, check_minimums,
-                                     norm_q, sha_text_bytes)
+                                     norm_q)
 from atlasrag.bench.audit_stability import validation_run, collect, classify
 
 ROOT = Path(__file__).resolve().parents[1]

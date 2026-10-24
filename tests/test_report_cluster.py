@@ -1,7 +1,6 @@
 import json
 import math
 
-import pytest
 
 from atlasrag.bench.report import (bootstrap_ci, cluster_bootstrap_ci, cluster_map, build_rows, to_markdown,
                                    paired_vs, paired_markdown, compare_groups, _exp_files)

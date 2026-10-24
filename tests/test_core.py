@@ -4,7 +4,7 @@ from atlasrag.ingest.chunking import chunk_section, build_chunks
 from atlasrag.ingest.pdf_parse import split_sections, is_heading
 from atlasrag.ingest.arxiv_fetch import build_query
 from atlasrag.retrieval.fusion import rrf
-from atlasrag.routers import build_router, HeuristicRouter, EscalatingRouter, OracleRouter, FixedRouter
+from atlasrag.routers import build_router, HeuristicRouter, EscalatingRouter, OracleRouter
 from atlasrag.routers.base import Router, RouteDecision
 
 

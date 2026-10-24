@@ -3,7 +3,6 @@ import sys
 import types
 from datetime import datetime, timezone
 
-import pytest
 
 from atlasrag.ingest.arxiv_fetch import build_query, fetch_papers
 
