@@ -4,7 +4,7 @@ Safe, resumable wrapper for AtlasRAG's scripts/gen_questions_v2.py.
 
 Defaults:
 - Manual execution (no scheduler is installed or configured).
-- Generate in batches of 5 accepted questions per type, targeting 50 per type.
+- Generate in batches targeting 5 additional audited candidates per type, up to 50 candidates per type.
 - Resume only the selected output file; never edits the existing benchmark file unless
   the user explicitly points --out at it.
 - Tracks cumulative provider tokens from <out>.runs.jsonl.
@@ -104,7 +104,7 @@ def main() -> int:
     p.add_argument("--target-per-type", type=int, default=50,
                    help="audited candidate target per type; human review is still required.")
     p.add_argument("--batch-size", type=int, default=5,
-                   help="maximum additional accepted questions targeted per type in each invocation.")
+                   help="maximum additional audited candidates targeted per type in each invocation.")
     p.add_argument("--attempts", type=int, default=3,
                    help="candidate attempts per missing question in the generator.")
     p.add_argument("--model", default="qwen/qwen3.8-27b")
@@ -195,7 +195,7 @@ def main() -> int:
 
         # The generator interprets --per-type as an absolute target for every type
         # passed to one invocation. To keep batches at exactly five new accepted
-        # questions per type, process the currently least-filled type(s) together.
+        # audited candidates per type, process the currently least-filled type(s) together.
         active_counts = [counts.get(t, 0) for t in args.types if pending[t] > 0]
         floor_count = min(active_counts)
         active = [t for t in args.types if pending[t] > 0 and counts.get(t, 0) == floor_count]
@@ -296,7 +296,7 @@ def main() -> int:
         # A successful batch resets transient rate-limit backoff.
         rate_retries = 0
         if no_progress_batches >= 2:
-            print("STOP: two consecutive batches produced no new accepted questions. This avoids burning tokens on a stalled generator.")
+            print("STOP: two consecutive batches produced no new audited candidates. This avoids burning tokens on a stalled generator.")
             return 6
 
         if args.pause_between_batches > 0 and any(

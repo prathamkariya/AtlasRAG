@@ -13,11 +13,11 @@ Reviewed the pushed main tree at `f4cd074d40234ed6e032a842a65f25b776d1287f`, rec
 5. **Candidate counts and language were misleading.** The automatic pipeline creates audited `candidate` rows; it does not human-accept benchmark records. Resume targets count candidates only, and status messages/docs now call them audited candidates.
 6. **Saved progress could be truncated on interruption.** Question JSONL writes now go through a same-directory temporary file and atomic replace.
 7. **Index invariants failed late and opaquely.** Empty indexes, non-2D embeddings, row-count mismatches and zero-dimensional vectors now fail early with actionable `ValueError`s; top-k returns an empty list for empty score arrays or `k <= 0`.
-8. **Relative config paths depended on the current directory.** `load_config()` resolves relative paths from the project root and validates that the YAML root and `llm` section have the expected structure. `show_questions.py` accepts `--config` so corpus-v2 question IDs can be resolved against the matching index.
+8. **Relative config paths depended on the current directory.** `load_config()` resolves relative paths from the project root and validates that the YAML root and `llm` section have the expected structure. Both `show_questions.py` and interactive `review_questions.py` accept `--config`, so corpus-v2 evidence is resolved against the matching corpus/index.
 9. **Ingestion accepted `date_from=None` in its type signature but compared a date string directly to `None`.** The fetcher now uses an explicit safe arXiv lower bound when no lower date is passed, with a regression test.
 10. **Default model calls were not paced.** The default config now uses the same 2.1-second minimum interval as corpus-v2; pacing timestamp updates before every provider attempt, including failed attempts.
 11. **Docs drifted.** Removed an obsolete hard-coded test count, documented the audited-candidate generation/review flow and corpus-config selection, and clarified that Compass is currently a placeholder rather than a functioning baseline.
-12. **CI coverage.** A `compileall` step now checks Python syntax across source, scripts and tests before pytest.
+12. **CI coverage.** A `compileall` step checks Python syntax across source, scripts and tests before pytest, with a Python 3.11/3.12 matrix.
 
 ## Data/artifact decisions
 
@@ -36,3 +36,11 @@ Reviewed the pushed main tree at `f4cd074d40234ed6e032a842a65f25b776d1287f`, rec
 ## Verification
 
 The branch adds tests for parameter normalization, empty completion handling, corrupted-cache recovery, resume target accounting, invalid-exit classification, index input validation, and `date_from=None`. Use the pull-request check result before merging; this report intentionally does not pre-claim those checks passed.
+
+### Follow-up findings (after the initial CI-green pass)
+
+- **API and response parsing:** the API reports HTTP 503 if the pipeline is not ready or the provider temporarily rate-limits/returns no completion. The LLM router rejects non-object JSON and non-finite confidence values; finalization safely handles validation JSON that is valid but not an object.
+- **Index writes:** index construction validates the embedding matrix before writing either artifact, so a bad encoder cannot replace a previously usable index with empty/corrupt files.
+- **Cache namespace:** `ATLAS_CACHE_NAMESPACE` was documented but ignored by `LLMClient`, allowing new runs to pollute the tracked `default` Run 1 cache. The client now honors the override and rejects blank/path-like namespace values. Use `ATLAS_CACHE_NAMESPACE=gen-v2` for new pilots.
+- **Review config:** `review_questions.py` now accepts `--config` in addition to the read-only evidence viewer, letting review read from the right corpus. The runner's target text now consistently distinguishes audited candidates from human-accepted benchmark rows.
+- Latest completed matrix run on commit `c481cc2b926841d615dae57cbd959adabd767f2d` passed on Python 3.11 and 3.12 (153 tests each); the cache-isolation follow-up adds tests and its new workflow result must be checked independently.
