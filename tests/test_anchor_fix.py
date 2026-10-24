@@ -43,3 +43,20 @@ def test_unicode_parameter_anchors_allow_complementary_pairing_without_weakening
     assert {"omega_m", "sigma_8"} <= shared
     assessed = assess_cross_paper_pair(a, b, qtype="multi_hop", dense_similarity=0.6)
     assert assessed.reason is None
+
+
+
+def test_common_ascii_and_tex_parameter_aliases_share_canonical_anchors():
+    pairs = [
+        ("H_0", "H0", "h0"),
+        ("N_eff", "Neff", "neff"),
+        ("sigma_8", "sigma8", "sigma8"),
+        (r"\Omega_m", "Ω_m", "omega_m"),
+        (r"\sigma_8", "σ₈", "sigma8"),
+        ("f_sigma_8", "fσ₈", "f_sigma8"),
+    ]
+    for left, right, canonical in pairs:
+        assert canonical in specific_scientific_signals(left), left
+        assert canonical in specific_scientific_signals(right), right
+        assert canonical in scientific_signals(left), left
+        assert canonical in scientific_signals(right), right
