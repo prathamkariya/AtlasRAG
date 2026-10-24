@@ -85,7 +85,13 @@ class LLMClient:
         self.headroom = int(cfg.get("token_headroom", 0)) if self.reasoning_effort else 0
         self.cache_dir = None
         if cache_root is not None:
-            self.cache_dir = Path(cache_root) / cfg.get("cache_namespace", "default")
+            # Use an environment override for isolated runs; never silently mix
+            # new generation/stability output into the tracked Run 1 cache.
+            namespace = os.getenv("ATLAS_CACHE_NAMESPACE") or cfg.get("cache_namespace", "default")
+            if (not isinstance(namespace, str) or not namespace.strip()
+                    or namespace in {".", ".."} or "/" in namespace or "\\" in namespace):
+                raise ValueError("ATLAS_CACHE_NAMESPACE / llm.cache_namespace must be a single non-empty folder name")
+            self.cache_dir = Path(cache_root) / namespace
             self.cache_dir.mkdir(parents=True, exist_ok=True)
         # calls/prompt_tokens/completion_tokens/cache_hits: LOGICAL accounting (cache-independent). Do not change
         # their meaning: Run 1 cost figures are computed from them.

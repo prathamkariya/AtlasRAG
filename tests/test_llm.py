@@ -101,3 +101,18 @@ def test_empty_text_in_valid_cache_is_evicted_and_regenerated(tmp_path, monkeypa
     assert llm.chat(messages) == "hello"
     assert len(llm.client.calls) == 2
     assert llm.stats["cache_corruptions"] == 1
+
+
+def test_cache_namespace_environment_override_is_honored(tmp_path, monkeypatch):
+    monkeypatch.setenv("ATLAS_CACHE_NAMESPACE", "unit-run-2")
+    llm = make(tmp_path, monkeypatch)
+    assert llm.cache_dir == tmp_path / "unit-run-2"
+    llm.chat([{"role": "user", "content": "separate namespace"}])
+    assert list((tmp_path / "unit-run-2").glob("*.json"))
+
+
+@pytest.mark.parametrize("namespace", ["../outside", "folder/name", r"folder\name", "..", ""])
+def test_cache_namespace_rejects_paths_and_empty_names(tmp_path, monkeypatch, namespace):
+    monkeypatch.setenv("ATLAS_CACHE_NAMESPACE", namespace)
+    with pytest.raises(ValueError, match="single non-empty folder name"):
+        make(tmp_path, monkeypatch)
