@@ -77,7 +77,8 @@ _GREEK_NAMES = {
 }
 _GREEK_CLASS = re.escape("".join(_GREEK_NAMES))
 _LATEX_GREEK = re.compile(
-    r"\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)\b",
+    # TeX control words may be followed by subscripts: \Omega_m, \sigma_8.
+    r"\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)(?![A-Za-z])",
     re.I,
 )
 _GREEK_WITH_SUFFIX = re.compile(r"([" + _GREEK_CLASS + r"])_?([A-Za-z]+|[0-9]+)")
@@ -110,6 +111,12 @@ def _canonicalize_scientific_text(text: str) -> str:
     # A free-standing Greek symbol is useful as a general signal, but is not a
     # specific anchor unless it has a parameter/model suffix.
     text = re.sub(r"([" + _GREEK_CLASS + r"])", lambda m: _GREEK_NAMES[m.group(1)], text)
+
+    # Canonicalize common ASCII aliases that denote the same cosmology parameter.
+    # Keep these rules conservative; don't merge arbitrary letter-letter subscripts.
+    text = re.sub(r"(?<![A-Za-z])N_?eff\b", "Neff", text, flags=re.I)
+    text = re.sub(r"(?<![A-Za-z])sigma_([0-9]+)\b", r"sigma\1", text, flags=re.I)
+    text = re.sub(r"\b([A-Za-z]{1,2})_([0-9]+)\b", r"\1\2", text)
     return text
 
 

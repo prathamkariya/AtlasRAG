@@ -22,11 +22,11 @@ def test_unicode_latex_and_plain_parameter_aliases_normalize_to_the_same_anchor(
         ("Ω_m", r"\Omega_m", "omega_m"),
         ("α_s", r"\alpha_s", "alpha_s"),
         ("βs", "beta_s", "beta_s"),
-        ("σ₈", "sigma_8", "sigma_8"),
-        ("fσ8", "f_sigma_8", "f_sigma_8"),
+        ("σ₈", "sigma_8", "sigma8"),
+        ("fσ8", "f_sigma_8", "f_sigma8"),
         ("H₀", "H0", "h0"),
         ("n_s", "n_s", "n_s"),
-        ("S_8", "S_8", "s_8"),
+        ("S_8", "S_8", "s8"),
         ("ΔNeff", "delta_neff", "delta_neff"),
     ]
     for unicode_or_latex, plain, canonical in pairs:
@@ -40,6 +40,23 @@ def test_unicode_parameter_anchors_allow_complementary_pairing_without_weakening
     a = "The posterior for Ω_m and σ₈ from DESI BAO constrains early-universe structure."
     b = "Independent Omega_m and sigma_8 estimates compare CMB observations with neutrino models."
     shared = specific_scientific_signals(a) & specific_scientific_signals(b)
-    assert {"omega_m", "sigma_8"} <= shared
+    assert {"omega_m", "sigma8"} <= shared
     assessed = assess_cross_paper_pair(a, b, qtype="multi_hop", dense_similarity=0.6)
     assert assessed.reason is None
+
+
+
+def test_common_ascii_and_tex_parameter_aliases_share_canonical_anchors():
+    pairs = [
+        ("H_0", "H0", "h0"),
+        ("N_eff", "Neff", "neff"),
+        ("sigma_8", "sigma8", "sigma8"),
+        (r"\Omega_m", "Ω_m", "omega_m"),
+        (r"\sigma_8", "σ₈", "sigma8"),
+        ("f_sigma_8", "fσ₈", "f_sigma8"),
+    ]
+    for left, right, canonical in pairs:
+        assert canonical in specific_scientific_signals(left), left
+        assert canonical in specific_scientific_signals(right), right
+        assert canonical in scientific_signals(left), left
+        assert canonical in scientific_signals(right), right
