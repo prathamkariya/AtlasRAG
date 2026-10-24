@@ -1,77 +1,164 @@
-# AtlasRAG V1
+# AtlasRAG
 
-Adaptive retrieval routing for scientific literature (astrophysics / arXiv) — a replication and extension.
+**Adaptive Retrieval Routing for Scientific Literature (Hubble Tension Corpus)**
 
-> Research focus: testing adaptive retrieval routing on scientific literature, with emphasis on question-type-specific behavior and scientific evidence structure. Compass is a planned learned router; its current class is a placeholder and is not a working baseline.
+> **Research Focus:** Investigating whether adaptive, query-dependent retrieval routing improves evidence retrieval accuracy and efficiency over static hybrid retrieval when navigating dense, conflicting scientific literature in astrophysics.
+>
+> **Core Empirical Finding:** Static hybrid retrieval (**`B_static`**: Dense BGE-small + Lexical BM25 + Cross-Encoder reranking) decisively outperforms adaptive LLM routing (**`C_llm_router`**) by **+10.0% evidence recall** ($p < 0.05$), with **0 LLM calls**, **zero token overhead**, and **more than 2x lower latency**. Static hybrid operates within **2%** of the empirical Oracle ceiling (**`E_oracle`**).
+>
+> **Scope & Status:** Corpus v3 (121 papers, 4,076 chunks) and Benchmark v3 (64 questions, 30 test papers) are frozen, fully audited, and evaluated across 8 baselines. `CompassRouter` is an unbuilt placeholder and is documented as future work.
 
-**Research question:** does adaptive retrieval routing give consistent benefits for scientific-literature QA, or are its gains concentrated in particular question types and evidence structures? Full spec in `docs/`.
+---
 
-## Quick start
+## 1. Key Results Summary
 
-```bash
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
+Evaluated on the frozen, leakage-free test split of **Benchmark v3** (`atlasrag-bench-v3`, $n=64$, 30 test papers):
+
+| Experiment | Router / Strategy | Evidence Recall [95% CI] | Paper Recall [95% CI] | Median Latency | Provider Tokens | LLM Calls | Route Acc |
+|---|---|---|---|---|---|---|---|
+| **A_vanilla** | Dense only ($k=5$) | 0.49 [0.39, 0.60] | 0.67 [0.57, 0.77] | 0.04s | 0 | 0.00 | — |
+| **B_static** | **Static Hybrid + Rerank ($k=8$)** | **0.69 [0.59, 0.78]** | **0.86 [0.77, 0.93]** | **2.00s** | **0** | **0.00** | — |
+| **K_static_k10** | Static Hybrid + Rerank ($k=10$) | 0.70 [0.61, 0.80] | 0.88 [0.80, 0.94] | 1.83s | 0 | 0.00 | — |
+| **C_llm_router** | LLM-based Adaptive Router | 0.59 [0.48, 0.69] | 0.77 [0.67, 0.86] | 4.53s | 458 | 1.84 | 0.19 |
+| **H_heuristic** | Rule-based Heuristic (dev only) | 0.53 [0.43, 0.63] | 0.71 [0.61, 0.81] | 0.03s | 32 | 0.12 | 0.36 |
+| **F_uncertain** | Always Decomposed Hybrid ($k=10$) | 0.70 [0.60, 0.79] | 0.88 [0.80, 0.94] | 4.35s | 248 | 1.00 | — |
+| **G_multihop** | Always Decomposed Multi-Hop ($k=8$) | 0.66 [0.57, 0.76] | 0.83 [0.74, 0.91] | 9.14s | 248 | 1.00 | — |
+| **E_oracle** | Oracle Route Upper Bound | 0.71 [0.61, 0.80] | 0.87 [0.78, 0.93] | 3.47s | 156 | 0.62 | 1.00 |
+
+*Paired Difference vs. Static Hybrid (`B_static`):*
+- **`A_vanilla` vs `B_static`:** Mean recall diff **-0.20** [95% CI: -0.30, -0.09] — $p < 0.001$ (Hybrid significantly superior).
+- **`C_llm_router` vs `B_static`:** Mean recall diff **-0.10** [95% CI: -0.18, -0.03] — $p < 0.05$ (LLM router significantly underperforms).
+- **`E_oracle` vs `B_static`:** Mean recall diff **+0.02** [95% CI: -0.02, +0.08] — difference includes zero (Static hybrid operates near the Oracle ceiling).
+
+Detailed analysis, question-type stratifications, and cluster-robust bootstrap CIs are documented in [`reports/FINAL_RESULTS.md`](reports/FINAL_RESULTS.md).
+
+---
+
+## 2. Completed vs. Future Work
+
+### Completed Deliverables
+- **Curated Corpus v3:** 121 unique papers on the Hubble tension, 4,076 chunks, zero PDF parse errors. Verified against manifest [`corpus/manifests/atlasrag-corpus-v3.json`](corpus/manifests/atlasrag-corpus-v3.json) and documented in [`docs/CORPUS_V3_MANIFEST.md`](docs/CORPUS_V3_MANIFEST.md).
+- **Benchmark v3 (`atlasrag-bench-v3`):** 64 questions across 30 test-split papers. Fully audited across 3 independent judge passes (95.0% stability agreement). Generator model `openai/gpt-oss-20b`, Judge model `openai/gpt-oss-120b` (strictly separated, zero self-judging). Maximum paper concentration is 12.5%.
+- **Full Experiment Matrix:** Baselines A, B, C, H, F, G, K, E executed and analyzed in `results/final_v3/` with a deterministic replication run in `results/final_v3_rerun/` (ranking stable, 0.000 recall drift).
+- **Comprehensive Test Suite:** 164 unit/integration tests passing in pytest.
+
+### Planned Future Work
+- **Compass Router (Baseline D):** `CompassRouter` remains an unbuilt placeholder stub in `src/atlasrag/routers/compass.py`. Building a trained local classifier (extracting lightweight query embeddings and surface features trained exclusively on the 89-paper train split without test contamination) is deferred to future work. It was intentionally omitted from the evaluation matrix to uphold scientific integrity.
+
+---
+
+## 3. Quickstart
+
+### Prerequisites & Setup
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-cp .env.example .env                                   # add GROQ_API_KEY (free, no card)
-make check                                             # imports + keys; `python scripts/check_env.py --ping` tests the LLM
-make test                                              # offline tests; no API keys needed
-make fetch                                             # arXiv metadata + PDFs (polite: 3s delay)
-make index                                             # parse -> chunk -> embed -> index
-make serve                                             # http://localhost:8000/docs
+cp .env.example .env     # Add GROQ_API_KEY
 ```
 
-Docker: `cp .env.example .env && docker compose up --build`
-
-## Week 1 checklist
-- [ ] Accounts: Groq, W&B, Hugging Face, Kaggle; claim GitHub Student Pack
-- [ ] `make check` all green
-- [ ] **Pick the subtopic** in `configs/default.yaml` (`corpus.keywords`). It must have papers that disagree.
-- [ ] `make fetch` (start with `--max-papers 30` to sanity check)
-- [ ] `make index`, then spot-read `data/processed/chunks.jsonl`: are sections sane? Fix the parser before scaling.
-- [ ] `POST /ask` with routers `vanilla` and `static` on 10 hand-written questions
-- [ ] Push to GitHub
-
-## Week 2: benchmark (built, tested offline)
-See `docs/WEEK2_GUIDE.md`. Pipeline: `gen_questions` -> `review_questions` (human) -> `label_oracle` -> `run_experiment` -> `report`.
-
-For the quality-gated V2 candidate pipeline, use `python scripts/gen_questions_v2.py --split test --per-type 10 --types simple multi_hop --attempts 3 --out data/bench/pilot.jsonl`. The resumable runner is `python scripts/auto_gen_questions.py`. Generated rows remain **candidates** until a human reviews them; an automated support audit is not human acceptance. To use the larger corpus, set `ATLAS_CONFIG=configs/corpus_v2.yaml` before running a command. To inspect a question and its evidence, use `python scripts/show_questions.py --config configs/corpus_v2.yaml --file data/bench/questions_v3.jsonl --ids <question-id>`. To accept/reject candidates, use `python scripts/review_questions.py --config configs/corpus_v2.yaml --file data/bench/questions_v3.jsonl --split test`.
-
-## How experiments map to code
-One pipeline (`pipeline.py`). The router returns a strategy label; `configs/default.yaml -> strategies` defines what runs.
-
-| Exp | Router | Where |
-|---|---|---|
-| A vanilla | `FixedRouter("VANILLA")` | working |
-| B static | `FixedRouter("STATIC")` | working |
-| C LLM router | `LLMRouter` | working |
-| D Compass | `CompassRouter` | Week 3 (`HeuristicRouter` is a dev stand-in, not a baseline) |
-| E oracle | `OracleRouter(gold)` | needs Week 2 gold labels |
-
-`EscalatingRouter(compass, llm_router, threshold)` implements the H3 escalation. Sweep the threshold; don't fix it.
-
-## Rules that keep the study honest
-- Every experiment uses the same pipeline; only the router changes.
-- Run every comparison twice (set `ATLAS_CACHE_NAMESPACE=stability-run-2` for the rerun) and check rankings hold. The environment override is honored by the client; use a separate namespace so repeat runs are uncached.
-- Measure latency on uncached runs only. LLM-call and token counts are cache-independent.
-- Compass never sees the answering LLM's context.
-- Never state results before running them.
-
-## Free-tier budget (plan for this)
-Free-tier LLM access changes often. Groq's llama-3.x models became Enterprise-only; the self-serve models are now `openai/gpt-oss-20b` / `openai/gpt-oss-120b` (reasoning models). Run `python scripts/list_models.py` to see what YOUR key can call, and check your per-model limits at console.groq.com/settings/limits (requests/min and tokens/day differ per model). One answered question costs roughly 2-4K tokens, so full A-E runs plus reruns can span days: keep the benchmark to ~100-150 questions at first and rely on the LLM cache. Reasoning models also spend completion tokens thinking; `llm.reasoning_effort: low` and `llm.token_headroom` in the config control that.
-
-## Layout
-```
-configs/default.yaml     all knobs (corpus, chunking, models, strategies, thresholds)
-src/atlasrag/ingest/     arXiv fetch, PDF parse, chunking
-src/atlasrag/retrieval/  embedder, numpy+BM25 index, RRF fusion, reranker
-src/atlasrag/routers/    fixed, heuristic, llm, oracle, compass (stub), escalating
-src/atlasrag/pipeline.py shared pipeline for A-E
-src/atlasrag/bench/      question schema, generation, oracle, runner, stratified report
-src/atlasrag/api/        FastAPI service
-scripts/                 fetch_arxiv, build_index, check_env
-tests/                   offline tests (fake LLM/embedder)
-docs/                    project spec (MD + HTML)
+Verify environment and run offline test suite:
+```powershell
+$env:PYTHONPATH = "src"
+python scripts/check_env.py --ping
+python -m pytest -q
 ```
 
-## Known limitations (Week 1)
-- PDF parsing is heuristic; two-column order and equations/tables are imperfect. Upgrade path: parse arXiv LaTeX source.
-- Dense index is a numpy matrix (fine to ~10^5 chunks).
+---
+
+## 4. End-to-End Reproduction Commands
+
+All commands run under PowerShell with the venv active.
+
+### 4.1 Corpus v3 Build & Verification
+```powershell
+$env:PYTHONPATH = "src"
+$env:ATLAS_CONFIG = "configs/corpus_v3.yaml"
+
+# 1. Parse PDFs and create chunks
+python scripts/parse_pdfs.py --config configs/corpus_v3.yaml
+
+# 2. Build dense and BM25 index
+python scripts/build_index.py --config configs/corpus_v3.yaml
+
+# 3. Verify corpus manifest integrity
+python scripts/make_corpus_manifest.py --verify corpus/manifests/atlasrag-corpus-v3.json
+```
+
+### 4.2 Benchmark v3 Finalization & Oracle Labeling
+```powershell
+$env:PYTHONPATH = "src"
+$env:ATLAS_CONFIG = "configs/corpus_v3.yaml"
+
+# 1. Audit stability (3 passes with independent judge)
+python scripts/audit_stability.py --input data/bench/questions_v3_candidates.jsonl --output data/bench/v3_stability/audit_stability.json --reps 2 --judge-model openai/gpt-oss-120b
+
+# 2. Finalize benchmark assembly (enforcing concentration <= 12.5% and test isolation)
+python scripts/finalize_benchmark.py --candidates data/bench/questions_v3_candidates.jsonl --stability-audit data/bench/v3_stability/audit_stability.json --out-dir data/bench/final/atlasrag-bench-v3 --max-concentration 0.125
+
+# 3. Label oracle routes
+python scripts/label_oracle_v2.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl
+```
+
+### 4.3 Experiment Matrix Execution & Reporting
+```powershell
+$env:PYTHONPATH = "src"
+$env:ATLAS_CONFIG = "configs/corpus_v3.yaml"
+
+# Run all baselines
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type VANILLA --strategy-override VANILLA --out results/final_v3/A_vanilla.jsonl
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type STATIC --strategy-override STATIC --out results/final_v3/B_static.jsonl
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type LLM --out results/final_v3/C_llm_router.jsonl
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type HEURISTIC --out results/final_v3/H_heuristic_devonly.jsonl
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type FIXED --strategy-override UNCERTAIN --out results/final_v3/F_always_uncertain.jsonl
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type FIXED --strategy-override MULTI_HOP --out results/final_v3/G_always_multi_hop.jsonl
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type FIXED --strategy-override STATIC_K10 --out results/final_v3/K_static_k10.jsonl
+python scripts/run_experiment.py --config configs/corpus_v3.yaml --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --split test --group final_v3 --router-type ORACLE --out results/final_v3/E_oracle.jsonl
+
+# Generate paired comparative report
+python scripts/report.py --group final_v3 --benchmark data/bench/final/atlasrag-bench-v3/questions_final.jsonl --paired-ref B
+```
+
+---
+
+## 5. Repository Layout
+
+```
+configs/
+  corpus_v3.yaml             # Frozen configuration for Corpus v3 paths & parameters
+  default.yaml               # Default baseline configuration
+corpus/manifests/
+  atlasrag-corpus-v3.json    # Machine-readable corpus manifest (SHA256, paper metadata)
+data/
+  bench/final/atlasrag-bench-v3/
+    questions_final.jsonl    # Frozen final benchmark (64 questions)
+    benchmark_manifest.json  # Benchmark metadata, concentration metrics, audit summary
+  index_v3/                  # Frozen BGE-small dense embeddings & chunk index
+  processed_v3/              # Parsed chunks (4,076 chunks)
+  raw_v3/                    # Curated metadata (121 papers) and PDFs
+docs/
+  CORPUS_V3_MANIFEST.md      # Human-readable Corpus v3 inventory and exclusion audit
+reports/
+  FINAL_RESULTS.md           # Full empirical evaluation report with stratified statistics
+results/
+  final_v3/                  # Run outputs for baselines A, B, C, H, F, G, K, E
+  final_v3_rerun/            # Stability rerun outputs
+scripts/                     # Build, benchmark, execution, and evaluation utilities
+src/atlasrag/
+  bench/                     # Benchmark schema, audit, generation, and reporting
+  ingest/                    # arXiv fetching, PDF parsing, text chunking
+  retrieval/                 # Dense embedder, BM25 index, cross-encoder reranker
+  routers/                   # Fixed, heuristic, LLM, and oracle router implementations
+  pipeline.py                # Unified execution pipeline for all strategies
+tests/                       # 164 unit and integration tests
+```
+
+---
+
+## 6. Operating Rules & Research Integrity
+
+1. **Identical Pipelines:** All routers are evaluated using the identical retrieval and scoring pipeline (`pipeline.py`).
+2. **Strict Paper-Level Split:** Zero questions in Benchmark v3 cite papers from the training split.
+3. **Model Independence:** Benchmark generation and judge evaluation are executed on distinct models (`openai/gpt-oss-20b` vs `openai/gpt-oss-120b`).
+4. **Honest Provenance:** Only human-reviewed questions carry `review:human`; all model-assisted items are marked `review:llm_assisted`.
+5. **No Fabricated Baselines:** Unimplemented models (Compass) are documented as placeholders and excluded from empirical rankings.

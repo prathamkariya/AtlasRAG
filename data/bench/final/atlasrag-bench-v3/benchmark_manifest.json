@@ -1,0 +1,35 @@
+{
+ "benchmark_id": "atlasrag-bench-v3",
+ "created": "2026-10-24T21:19:09",
+ "git_commit": "00f6c08",
+ "source_file": "data\\bench\\final\\atlasrag-bench-v3\\questions_final.jsonl",
+ "corpus_manifest_sha256": "f71d903aaf60487e7702c2178508401606bf99355fd1b19d247e20bd23c840e7",
+ "questions_sha256": "58ebacd6a9e83f56a282eb0b99623bcb587d711f9edc0acdd51a66dafa2bfa1a",
+ "require_runs": 3,
+ "n_questions": 64,
+ "by_type": {
+  "multi_hop": 23,
+  "simple": 30,
+  "chain": 4,
+  "temporal": 7
+ },
+ "n_distinct_papers": 30,
+ "max_paper_share": 0.125,
+ "max_paper_share_first_paper": 0.109,
+ "review_modes": {
+  "human": 1,
+  "llm_assisted": 63
+ },
+ "generator_models": [
+  "openai/gpt-oss-20b"
+ ],
+ "judge_models": [
+  "openai/gpt-oss-120b"
+ ],
+ "self_judged_questions": 0,
+ "same_model_generated_and_judged": false,
+ "stability_judge_model": "openai/gpt-oss-120b",
+ "stability_self_judged_questions": 0,
+ "rejected_total": 0,
+ "rejected_by_reason": {}
+}
