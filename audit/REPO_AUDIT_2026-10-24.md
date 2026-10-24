@@ -17,30 +17,30 @@ Reviewed the pushed main tree at `f4cd074d40234ed6e032a842a65f25b776d1287f`, rec
 9. **Ingestion accepted `date_from=None` in its type signature but compared a date string directly to `None`.** The fetcher now uses an explicit safe arXiv lower bound when no lower date is passed, with a regression test.
 10. **Default model calls were not paced.** The default config now uses the same 2.1-second minimum interval as corpus-v2; pacing timestamp updates before every provider attempt, including failed attempts.
 11. **Docs drifted.** Removed an obsolete hard-coded test count, documented the audited-candidate generation/review flow and corpus-config selection, and clarified that Compass is currently a placeholder rather than a functioning baseline.
-12. **CI coverage.** A `compileall` step checks Python syntax across source, scripts and tests before pytest, with a Python 3.11/3.12 matrix.
+12. **CI coverage and dead-code cleanup.** CI compiles all source/scripts/tests, runs Ruff's undefined/unused-name checks, and runs pytest on Python 3.11 and 3.12. Removed 13 unused imports/assignments found by Ruff and declared intentional public router re-exports explicitly.
 
 ## Data/artifact decisions
 
 - `data/bench/questions_v3.jsonl`, run histories, stability reports and frozen question files are kept. The exact duplicate backup is archived unchanged rather than left beside the active benchmark.
 - The zero-byte `data/bench/final/atlasrag-v3-2026-10-23/questions_final.jsonl` is intentionally preserved for provenance. Its manifest reports zero questions and the empty-file SHA-256; it is **not** a usable final benchmark.
 - Historical candidate rows remain candidates until a person reviews them. An automated support verdict is not ground truth or human acceptance.
-- The tracked `data/llm_cache/default/` namespace is described by the repo as retained for Run 1 reproducibility. Newly introduced cache blobs from the latest run are removed; the pre-existing cache remains.
+- The tracked `data/llm_cache/default/` namespace is described by the repo as retained for Run 1 reproducibility. Newly introduced cache blobs from the latest run are removed; the pre-existing cache remains. Set `ATLAS_CACHE_NAMESPACE=gen-v2` for the next generation pilot.
 
 ## Remaining quality limitations
 
 - The full pair-funnel script is an upper bound over all cross-paper chunk combinations, not what dense+BM25 actually returns. Improved aliases will not by themselves guarantee a usable neighbor in the retrieved pool.
 - Chain yield is still dependent on section labeling and whether later-section material adds evidence beyond the abstract. Do not weaken this gate merely to increase counts.
 - LLM-backed end-to-end generation was not run as part of this offline audit; it would consume provider tokens and depend on a live key/quota. A real provider pilot is still needed to measure question yield after the fixes.
+- CI verifies the committed corpus manifest but warns that 119 PDFs are absent in the checkout. This is expected for ignored/downloaded source files; use `scripts/refetch_pdfs.py` before rebuilding the corpus locally.
 - This was a static source/code and test audit through GitHub. It does not certify the remote API key, live Groq availability, downloaded corpus/PDF integrity, or model-quality claims.
 
 ## Verification
 
-The branch adds tests for parameter normalization, empty completion handling, corrupted-cache recovery and cache-namespace isolation, resume target accounting, invalid-exit classification, index input validation, API readiness and `date_from=None`. At the latest completed run (`c5d90c3a28840b0ac0609637f72d99e14cc14fec`), CI passed on Python 3.11 and 3.12 with 159 tests each. A newer change teaches the runner to count human-approved rows toward its target and adds a Ruff undefined/unused-name pass; its check result is pending.
+The branch adds tests for parameter normalization, empty completion handling, corrupted-cache recovery and cache-namespace isolation, resume target accounting, invalid-exit classification, index input validation, API readiness and `date_from=None`. The latest completed run on `e531e28162e8bd3e2ccca212712fafe5294c653a` passed on Python 3.11 and 3.12 with **159 tests on each version**, `compileall`, Ruff (`--select F`), and the corpus-manifest check.
 
 ### Follow-up findings (after the initial CI-green pass)
 
 - **API and response parsing:** the API reports HTTP 503 if the pipeline is not ready or the provider temporarily rate-limits/returns no completion. The LLM router rejects non-object JSON and non-finite confidence values; finalization safely handles validation JSON that is valid but not an object.
-- **Index writes:** index construction validates the embedding matrix before writing either artifact, so a bad encoder cannot replace a previously usable index with empty/corrupt files.
+- **Index writes:** index construction validates the embedding matrix before writing index artifacts, and `build_index.py` publishes processed chunks atomically only after the new index build succeeds, so parse/embedding failures do not replace the previous processed chunk file.
 - **Cache namespace:** `ATLAS_CACHE_NAMESPACE` was documented but ignored by `LLMClient`, allowing new runs to pollute the tracked `default` Run 1 cache. The client now honors the override and rejects blank/path-like namespace values. Use `ATLAS_CACHE_NAMESPACE=gen-v2` for new pilots.
 - **Review config:** `review_questions.py` now accepts `--config` in addition to the read-only evidence viewer, letting review read from the right corpus. The runner's target text now consistently distinguishes audited candidates from human-accepted benchmark rows.
-- Latest completed matrix run on commit `c481cc2b926841d615dae57cbd959adabd767f2d` passed on Python 3.11 and 3.12 (153 tests each); the cache-isolation follow-up adds tests and its new workflow result must be checked independently.
