@@ -1,10 +1,9 @@
 {
- "runs": 2,
+ "runs": 3,
  "questions": 70,
  "classes": {
   "stable_pass": 65,
-  "stable_fail": 4,
-  "unstable": 1
+  "unstable": 5
  },
  "by_type": {
   "chain": {
@@ -13,20 +12,21 @@
   },
   "multi_hop": {
    "stable_pass": 23,
-   "stable_fail": 1
+   "unstable": 1
   },
   "simple": {
    "stable_pass": 30
   },
   "temporal": {
    "stable_pass": 7,
-   "stable_fail": 3
+   "unstable": 3
   }
  },
- "pairwise_agreement": 0.9857142857142858,
+ "pairwise_agreement": 0.9523809523809523,
  "per_question": {
   "multi_hop-c593c727": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -36,6 +36,7 @@
   "simple-eb13d585": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -43,6 +44,7 @@
   },
   "simple-e8f0949e": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -52,6 +54,7 @@
   "simple-ad46c5b1": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -59,6 +62,7 @@
   },
   "simple-9f565f23": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -68,6 +72,7 @@
   "simple-a6d2f98b": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -75,6 +80,7 @@
   },
   "simple-752e48ca": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -84,6 +90,7 @@
   "simple-fbbd2f08": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -91,6 +98,7 @@
   },
   "simple-ed26aa8d": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -100,6 +108,7 @@
   "simple-a4a6ade7": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -107,6 +116,7 @@
   },
   "simple-bfc8b6a7": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -116,6 +126,7 @@
   "simple-89fece1c": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -123,6 +134,7 @@
   },
   "simple-4fde1449": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -132,6 +144,7 @@
   "simple-8fc80a52": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -139,6 +152,7 @@
   },
   "simple-c62d2852": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -148,6 +162,7 @@
   "simple-9bf7c531": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -155,6 +170,7 @@
   },
   "simple-18d93524": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -164,6 +180,7 @@
   "simple-f941815b": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -171,6 +188,7 @@
   },
   "simple-3a59e29c": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -180,6 +198,7 @@
   "simple-b5acaf04": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -187,6 +206,7 @@
   },
   "simple-80039277": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -196,6 +216,7 @@
   "simple-3c224b62": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -203,6 +224,7 @@
   },
   "simple-d45f7434": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -212,6 +234,7 @@
   "simple-45c6079c": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -219,6 +242,7 @@
   },
   "simple-1bc9d025": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -228,6 +252,7 @@
   "simple-89d01943": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -235,6 +260,7 @@
   },
   "simple-25719e5b": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -244,6 +270,7 @@
   "simple-68ff8602": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -251,6 +278,7 @@
   },
   "simple-1d8cfa7a": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -260,6 +288,7 @@
   "simple-71bc0f8a": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -267,6 +296,7 @@
   },
   "simple-5e0b1a80": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -276,6 +306,7 @@
   "multi_hop-81cd3cae": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -283,6 +314,7 @@
   },
   "multi_hop-ecbf29ba": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -292,6 +324,7 @@
   "multi_hop-e785e7eb": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -299,6 +332,7 @@
   },
   "multi_hop-3df03bc8": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -308,6 +342,7 @@
   "multi_hop-7659b455": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -315,6 +350,7 @@
   },
   "multi_hop-50549cd8": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -324,6 +360,7 @@
   "multi_hop-aba4519e": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -331,6 +368,7 @@
   },
   "multi_hop-fa96055e": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -340,13 +378,15 @@
   "multi_hop-fde55a12": {
    "verdicts": [
     false,
-    false
+    false,
+    true
    ],
-   "class": "stable_fail",
+   "class": "unstable",
    "type": "multi_hop"
   },
   "multi_hop-7ab6a408": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -356,6 +396,7 @@
   "multi_hop-1814f312": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -363,6 +404,7 @@
   },
   "multi_hop-437dea7f": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -372,6 +414,7 @@
   "multi_hop-21a0034a": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -379,6 +422,7 @@
   },
   "multi_hop-cb3795ba": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -388,6 +432,7 @@
   "multi_hop-8a835819": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -395,6 +440,7 @@
   },
   "multi_hop-0fdd7be7": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -404,6 +450,7 @@
   "multi_hop-932f6847": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -411,6 +458,7 @@
   },
   "multi_hop-cae12124": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -420,6 +468,7 @@
   "multi_hop-d7c05f1c": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -427,6 +476,7 @@
   },
   "multi_hop-5e31331e": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -436,6 +486,7 @@
   "multi_hop-e40883f7": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -443,6 +494,7 @@
   },
   "multi_hop-df32e799": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -452,6 +504,7 @@
   "multi_hop-d3e03a52": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -459,6 +512,7 @@
   },
   "chain-89a8604c": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -468,6 +522,7 @@
   "chain-bd9b43c2": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -476,6 +531,7 @@
   "chain-424b58d2": {
    "verdicts": [
     false,
+    true,
     true
    ],
    "class": "unstable",
@@ -483,6 +539,7 @@
   },
   "temporal-68d7fc7d": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -492,6 +549,7 @@
   "temporal-b7cfd1d5": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -499,6 +557,7 @@
   },
   "temporal-91a6b5bd": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -508,13 +567,15 @@
   "temporal-175431c7": {
    "verdicts": [
     false,
-    false
+    false,
+    true
    ],
-   "class": "stable_fail",
+   "class": "unstable",
    "type": "temporal"
   },
   "temporal-5fb300bd": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -524,21 +585,24 @@
   "temporal-4e23e87b": {
    "verdicts": [
     false,
-    false
+    false,
+    true
    ],
-   "class": "stable_fail",
+   "class": "unstable",
    "type": "temporal"
   },
   "temporal-f8ddc4a9": {
    "verdicts": [
     false,
-    false
+    false,
+    true
    ],
-   "class": "stable_fail",
+   "class": "unstable",
    "type": "temporal"
   },
   "temporal-3f612d97": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -548,6 +612,7 @@
   "chain-5602c75f": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -555,6 +620,7 @@
   },
   "chain-8e18de84": {
    "verdicts": [
+    true,
     true,
     true
    ],
@@ -564,6 +630,7 @@
   "chain-92b7f1c9": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -572,6 +639,7 @@
   "temporal-e38e8889": {
    "verdicts": [
     true,
+    true,
     true
    ],
    "class": "stable_pass",
@@ -579,6 +647,7 @@
   },
   "temporal-6d8a3dfc": {
    "verdicts": [
+    true,
     true,
     true
    ],

@@ -234,3 +234,41 @@ def test_finalize_tolerates_valid_non_object_validation_json():
     assert "no_judge_model_recorded" in reasons
     manifest = build_manifest("malformed-validation", [q], {}, "hash")
     assert manifest["generator_models"] == [] and manifest["judge_models"] == []
+
+
+def test_refresh_manifest_guards(tmp_path):
+    from scripts.refresh_benchmark_manifest import refresh_manifest
+    import pytest
+
+    bdir = tmp_path / "bench"
+    bdir.mkdir()
+    q_file = bdir / "questions_final.jsonl"
+    m_file = bdir / "benchmark_manifest.json"
+
+    # Test 1: Empty file aborts
+    q_file.write_text("")
+    m_file.write_text(json.dumps({"n_questions": 1, "rejected_total": 0, "rejected_by_reason": {}}))
+    with pytest.raises(SystemExit) as exc:
+        refresh_manifest(bdir)
+    assert "empty" in str(exc.value).lower()
+
+    # Test 2: Malformed JSON aborts
+    q_file.write_text("not json\n")
+    with pytest.raises(SystemExit) as exc:
+        refresh_manifest(bdir)
+    assert "malformed" in str(exc.value).lower()
+
+    # Test 3: Count mismatch aborts
+    q_obj = {"id": "q1", "question": "test?", "qtype": "simple", "gold_chunk_ids": ["c1"],
+             "gold_paper_ids": ["p1"], "split": "test", "status": "accepted"}
+    q_file.write_text(json.dumps(q_obj) + "\n")
+    m_file.write_text(json.dumps({"n_questions": 2, "by_type": {"simple": 2}, "rejected_total": 0, "rejected_by_reason": {}}))
+    with pytest.raises(SystemExit) as exc:
+        refresh_manifest(bdir)
+    assert "mismatch" in str(exc.value).lower()
+
+    # Test 4: Valid file succeeds
+    m_file.write_text(json.dumps({"n_questions": 1, "by_type": {"simple": 1}, "rejected_total": 1, "rejected_by_reason": {"fail": 1}}))
+    res = refresh_manifest(bdir)
+    assert res["n_questions"] == 1
+    assert res["questions_sha256"] is not None

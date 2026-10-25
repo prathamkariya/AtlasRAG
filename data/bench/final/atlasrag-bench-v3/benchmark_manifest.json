@@ -1,27 +1,39 @@
 {
  "benchmark_id": "atlasrag-bench-v3",
- "created": "2026-10-25T11:55:35",
- "git_commit": "b921d54",
+ "created": "2026-10-25T14:21:47",
+ "git_commit": "8ec0184",
  "source_file": "data/bench/questions_v3_candidates.jsonl",
  "corpus_manifest_sha256": "f71d903aaf60487e7702c2178508401606bf99355fd1b19d247e20bd23c840e7",
- "questions_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "questions_sha256": "58ebacd6a9e83f56a282eb0b99623bcb587d711f9edc0acdd51a66dafa2bfa1a",
  "require_runs": 3,
- "n_questions": 0,
- "by_type": {},
- "n_distinct_papers": 0,
- "max_paper_share": null,
- "max_paper_share_first_paper": null,
- "review_modes": {},
- "generator_models": [],
- "judge_models": [],
+ "n_questions": 64,
+ "by_type": {
+  "multi_hop": 23,
+  "simple": 30,
+  "chain": 4,
+  "temporal": 7
+ },
+ "n_distinct_papers": 30,
+ "max_paper_share": 0.125,
+ "max_paper_share_first_paper": 0.109,
+ "review_modes": {
+  "human": 1,
+  "llm_assisted": 63
+ },
+ "generator_models": [
+  "openai/gpt-oss-20b"
+ ],
+ "judge_models": [
+  "openai/gpt-oss-120b"
+ ],
  "self_judged_questions": 0,
  "same_model_generated_and_judged": false,
  "stability_judge_model": "openai/gpt-oss-120b",
  "stability_self_judged_questions": 0,
- "rejected_total": 70,
+ "rejected_total": 6,
  "rejected_by_reason": {
-  "too_few_judge_runs": 70,
-  "judge_stable_fail": 4,
-  "judge_unstable": 1
- }
+  "judge_unstable": 5,
+  "duplicate_gold_set": 1
+ },
+ "candidate_source_sha256": "df29e91163a1781adf067d7e3733580af4b9bfb860f07539fb8f6e7de28bb611"
 }
