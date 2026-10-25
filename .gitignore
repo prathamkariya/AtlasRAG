@@ -13,9 +13,11 @@ data/raw*/pdf/
 data/retrieval/
 data/index*/
 *.npy
-# LLM cache: only the Run 1 namespace is tracked (reproducibility of Run 1); new namespaces stay local.
-data/llm_cache/*
-!data/llm_cache/default/
+# LLM cache: do not track newly generated cache files (committed Run 1 cache remains tracked)
+data/llm_cache/
+
+# Agent prompt files
+AtlasRAG_Finalization_Agent_Prompt*.md
 *.patch
 audit_*view*.txt
 

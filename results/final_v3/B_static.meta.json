@@ -43,9 +43,10 @@
     }
   },
   "escalation": null,
-  "git_commit": "00f6c08",
+  "git_commit": "b921d54",
   "started": "2026-10-24T21:19:59",
   "retrieval_only": true,
   "router": "fixed:STATIC",
-  "n_questions": 64
+  "n_questions": 64,
+  "corpus_manifest_sha256": "f71d903aaf60487e7702c2178508401606bf99355fd1b19d247e20bd23c840e7"
 }

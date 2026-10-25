@@ -1,5 +1,15 @@
+"""Corpus v3 tests — portable by default.
+
+The default tests validate only tracked text artifacts (metadata.jsonl,
+chunks.jsonl, corpus manifest).  Index artifacts (emb.npy) and PDFs live
+in .gitignore and are checked only when they are locally present *or* when
+the environment variable RUN_CORPUS_INTEGRATION=1 is set.
+"""
 import json
+import os
 from pathlib import Path
+
+import pytest
 
 from atlasrag.bench.schema import paper_split
 from atlasrag.corpus_manifest import verify_manifest
@@ -11,13 +21,16 @@ PROC_V3 = CORPUS_ROOT / "data" / "processed_v3"
 INDEX_V3 = CORPUS_ROOT / "data" / "index_v3"
 MANIFEST_V3 = CORPUS_ROOT / "corpus" / "manifests" / "atlasrag-corpus-v3.json"
 
+_INTEGRATION = os.environ.get("RUN_CORPUS_INTEGRATION") == "1"
 
-def test_corpus_v3_manifest_and_files_exist():
+
+# ── Default (portable) tests ────────────────────────────────────────────
+
+def test_corpus_v3_tracked_files_exist():
+    """Tracked text artifacts must be present in any checkout."""
     assert MANIFEST_V3.exists(), "atlasrag-corpus-v3.json must exist"
     assert (RAW_V3 / "metadata.jsonl").exists(), "raw_v3/metadata.jsonl must exist"
     assert (PROC_V3 / "chunks.jsonl").exists(), "processed_v3/chunks.jsonl must exist"
-    assert (INDEX_V3 / "chunks.jsonl").exists(), "index_v3/chunks.jsonl must exist"
-    assert (INDEX_V3 / "emb.npy").exists(), "index_v3/emb.npy must exist"
 
 
 def test_corpus_v3_paper_curation():
@@ -35,15 +48,19 @@ def test_corpus_v3_paper_curation():
 
 
 def test_corpus_v3_manifest_verifies():
+    """Verify text hashes and paper IDs; PDF checks only when dir exists."""
     manifest = json.loads(MANIFEST_V3.read_text(encoding="utf-8"))
+    pdf_dir = RAW_V3 / "pdf" if (RAW_V3 / "pdf").exists() else None
     res = verify_manifest(
         manifest,
         RAW_V3 / "metadata.jsonl",
         PROC_V3 / "chunks.jsonl",
-        RAW_V3 / "pdf",
+        pdf_dir,
     )
     assert res["errors"] == []
-    assert res["warnings"] == []
+    # PDF warnings are acceptable in a clean checkout without PDFs
+    if pdf_dir is not None:
+        assert res["warnings"] == []
 
 
 def test_corpus_v3_train_test_split_isolation():
@@ -69,3 +86,23 @@ def test_corpus_v3_train_test_split_isolation():
     for cid, c in found_chunks.items():
         assert paper_split(c["paper_id"]) == "test"
         assert len(c["text"]) >= 500
+
+
+# ── Integration tests (local artifacts required) ────────────────────────
+
+_skip_integration = pytest.mark.skipif(
+    not _INTEGRATION and not (INDEX_V3 / "emb.npy").exists(),
+    reason="Index artifacts not present; set RUN_CORPUS_INTEGRATION=1 to require",
+)
+
+
+@_skip_integration
+def test_corpus_v3_index_artifacts_exist():
+    """Verify built index files are locally present and aligned."""
+    assert (INDEX_V3 / "chunks.jsonl").exists(), "index_v3/chunks.jsonl must exist"
+    assert (INDEX_V3 / "emb.npy").exists(), "index_v3/emb.npy must exist"
+    import numpy as np
+    emb = np.load(INDEX_V3 / "emb.npy")
+    idx_chunks = [json.loads(l) for l in (INDEX_V3 / "chunks.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert emb.shape[0] == len(idx_chunks), f"emb rows {emb.shape[0]} != index chunks {len(idx_chunks)}"
+    assert emb.shape[1] == 384, f"expected 384-dim BGE-small embeddings, got {emb.shape[1]}"
