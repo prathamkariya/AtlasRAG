@@ -95,7 +95,7 @@ $env:PYTHONPATH = "src"
 $env:ATLAS_CONFIG = "configs/corpus_v3.yaml"
 
 # 1. Audit stability (3 passes with independent judge model)
-python scripts/audit_stability.py --file data/bench/questions_v3_candidates.jsonl --out-dir data/bench/v3_stability --reps 2 --model openai/gpt-oss-120b --no-baseline --all
+python scripts/audit_stability.py --file data/bench/questions_v3_candidates.jsonl --out-dir data/bench/v3_stability --reps 2 --model openai/gpt-oss-120b --no-baseline --include-validation --all
 
 # 2. Finalize benchmark assembly (enforcing stability and test isolation)
 python scripts/finalize_benchmark.py --file data/bench/questions_v3_candidates.jsonl --stability data/bench/v3_stability/audit_stability.json --benchmark-id atlasrag-bench-v3 --corpus-manifest corpus/manifests/atlasrag-corpus-v3.json --allow-llm-assisted

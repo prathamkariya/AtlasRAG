@@ -206,7 +206,7 @@ python scripts/build_index.py
 python scripts/make_corpus_manifest.py --verify corpus/manifests/atlasrag-corpus-v3.json
 
 # 2. Stability audit (3 judge runs)
-python scripts/audit_stability.py --file data/bench/questions_v3_candidates.jsonl --out-dir data/bench/v3_stability --reps 2 --model openai/gpt-oss-120b --no-baseline --all
+python scripts/audit_stability.py --file data/bench/questions_v3_candidates.jsonl --out-dir data/bench/v3_stability --reps 2 --model openai/gpt-oss-120b --no-baseline --include-validation --all
 
 # 3. Finalize benchmark
 python scripts/finalize_benchmark.py --file data/bench/questions_v3_candidates.jsonl --stability data/bench/v3_stability/audit_stability.json --benchmark-id atlasrag-bench-v3 --corpus-manifest corpus/manifests/atlasrag-corpus-v3.json --allow-llm-assisted
