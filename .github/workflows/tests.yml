@@ -20,10 +20,7 @@ jobs:
       - run: python -m compileall -q src scripts tests
       - run: ruff check --select F src scripts tests
       - run: PYTHONPATH=src python -m pytest -q
-      - name: committed corpus matches its manifest (skipped until a manifest exists)
-        run: |
-          if [ -f corpus/manifests/atlasrag-corpus-v2.json ]; then
-            ATLAS_CONFIG=configs/corpus_v2.yaml PYTHONPATH=src python scripts/make_corpus_manifest.py --verify corpus/manifests/atlasrag-corpus-v2.json
-          else
-            echo "no corpus manifest yet"
-          fi
+      - name: frozen corpus v3 matches its manifest
+        run: ATLAS_CONFIG=configs/corpus_v3.yaml PYTHONPATH=src python scripts/make_corpus_manifest.py --verify corpus/manifests/atlasrag-corpus-v3.json
+      - name: benchmark v3 matches its manifest hash
+        run: python scripts/verify_benchmark.py

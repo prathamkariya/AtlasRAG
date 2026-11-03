@@ -120,7 +120,8 @@ python scripts/run_experiment.py --group final_v3 --exp H --file data/bench/fina
 python scripts/run_experiment.py --group final_v3 --exp F --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
 python scripts/run_experiment.py --group final_v3 --exp G --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
 python scripts/run_experiment.py --group final_v3 --exp K --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
-python scripts/run_experiment.py --group final_v3 --exp E --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
+python scripts/run_experiment.py --group final_v3 --exp E --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only `
+  --oracle-labels data/bench/final/atlasrag-bench-v3/oracle_v1_labels.json
 
 # Generate paired comparative report
 python scripts/report.py --group final_v3 --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --paired-ref B
@@ -140,11 +141,14 @@ data/
   bench/final/atlasrag-bench-v3/
     questions_final.jsonl    # Frozen final benchmark (64 questions)
     benchmark_manifest.json  # Benchmark metadata, concentration metrics, audit summary
+    oracle_v1_labels.json    # Frozen v1 Oracle labels; separate from the benchmark hash
   index_v3/                  # Frozen BGE-small dense embeddings & chunk index
   processed_v3/              # Parsed chunks (4,076 chunks)
   raw_v3/                    # Curated metadata (121 papers) and PDFs
 docs/
   CORPUS_V3_MANIFEST.md      # Human-readable Corpus v3 inventory and exclusion audit
+audit/archive/
+  docs/                      # Archived planning and agent-prompt material
 reports/
   FINAL_RESULTS.md           # Full empirical evaluation report with stratified statistics
 results/
@@ -169,3 +173,10 @@ tests/                       # Unit and integration tests
 3. **Model Independence:** Benchmark generation and judge evaluation are executed on distinct models (`openai/gpt-oss-20b` vs `openai/gpt-oss-120b`).
 4. **Honest Provenance:** Only human-reviewed questions carry `review:human`; all model-assisted items are marked `review:llm_assisted`.
 5. **No Fabricated Baselines:** Unimplemented models (Compass) are documented as placeholders and excluded from empirical rankings.
+
+## 7. Experiment E (oracle)
+
+`gold_route` was deliberately removed from the frozen benchmark questions. The v1 Oracle labels used by the recorded
+`E_oracle` run are stored in `data/bench/final/atlasrag-bench-v3/oracle_v1_labels.json`, restored from commit
+`3cca0da` without changing the benchmark hash. Rerun E with `--oracle-labels` as shown above. The sidecar is a
+label-based diagnostic, not an upper bound.

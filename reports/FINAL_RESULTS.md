@@ -225,7 +225,7 @@ python scripts/run_experiment.py --group final_v3 --exp H --file data/bench/fina
 python scripts/run_experiment.py --group final_v3 --exp F --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
 python scripts/run_experiment.py --group final_v3 --exp G --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
 python scripts/run_experiment.py --group final_v3 --exp K --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
-python scripts/run_experiment.py --group final_v3 --exp E --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only
+python scripts/run_experiment.py --group final_v3 --exp E --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --retrieval-only --oracle-labels data/bench/final/atlasrag-bench-v3/oracle_v1_labels.json
 
 # 7. Generate paired comparative report
 python scripts/report.py --group final_v3 --file data/bench/final/atlasrag-bench-v3/questions_final.jsonl --paired-ref B

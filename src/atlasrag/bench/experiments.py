@@ -9,9 +9,13 @@ NAMES = {"A": "A_vanilla", "B": "B_static", "C": "C_llm_router", "D": "D_compass
          "H": "H_heuristic_devonly"}
 
 
-def make_router(code: str, cfg: dict, llm, questions, escalate: float | None = None):
+def make_router(code: str, cfg: dict, llm, questions, escalate: float | None = None,
+                oracle_labels: dict[str, str] | None = None):
+    """Build a benchmark router; v1 Oracle labels may be supplied as a sidecar."""
     gold = None
-    if code == "E":
+    if code == "E" and oracle_labels is not None:
+        gold = {q.question: oracle_labels[q.id] for q in questions}
+    elif code == "E":
         gold = {q.question: q.gold_route for q in questions if q.gold_route}
     elif code == "E2":
         gold = {q.question: q.gold_route_v2 for q in questions if q.gold_route_v2}
