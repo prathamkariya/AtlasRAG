@@ -27,7 +27,7 @@ from atlasrag.bench.provenance import (
 ap = argparse.ArgumentParser()
 ap.add_argument("--group", required=True, help="results/<group>/ ; use a new group (and cache namespace) for reruns")
 ap.add_argument("--exp", required=True, choices=sorted(CODES))
-ap.add_argument("--file", default="data/bench/questions.jsonl")
+ap.add_argument("--file", default="data/bench/final/atlasrag-bench-v3/questions_final.jsonl")
 ap.add_argument("--split", default="test")
 ap.add_argument("--retrieval-only", action="store_true")
 ap.add_argument("--escalate", type=float)

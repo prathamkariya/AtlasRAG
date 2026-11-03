@@ -1,3 +1,10 @@
+# Archived pre-Phase-1 review
+
+This review predates the Phase 1 provenance guard, v1 Oracle-label sidecar, and current CI checks. Its statements
+about Oracle reproducibility and CI are historical observations, not current repository status. The current record is
+the [README](../../../README.md) and [final evaluation report](../../../reports/FINAL_RESULTS.md). It remains here
+only as audit history.
+
 ### Verdict
 
 The engineering is better than most student projects: 165 tests pass, ruff is clean, there are no secrets in git history, writes are atomic, and the split is paper-level with cluster bootstraps. The headline scientific claims are not solid, though, and several are contradicted by your own committed data. In an interview, the oracle and “frozen” claims are where you’d get hurt.

@@ -210,6 +210,11 @@ identical to the routes in `E_oracle.jsonl`); rerun E with `--oracle-labels` (co
 The benchmark manifest was regenerated on 2026-10-26 and reflects the HEAD file, so the "frozen" description
 applies to questions and gold IDs, not to the removed `gold_route` field.
 
+`results/final_v3/report.md` is a generated aggregate that auto-discovers JSONL files in its results group. It
+therefore includes `E2_oracle_v2`, a later diagnostic run routed from `gold_route_v2`. E2 is not a replacement for
+the recorded v1 `E_oracle` run, does not restore exact-input reproducibility for the historical experiment, and is
+not used for the claims or tables in this report.
+
 Other verified properties: corpus manifest hashes verified in tests; test suite 165 passed, 1 skipped at `2d35713`
 (CI matrix Python 3.11 and 3.12); tests use fakes and do not load real models.
 

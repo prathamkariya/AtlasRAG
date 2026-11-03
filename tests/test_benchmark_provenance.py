@@ -48,7 +48,7 @@ def test_committed_benchmark_matches_its_manifest():
 
 def test_tampered_questions_are_rejected_and_crlf_is_normalized(tmp_path):
     question_file = _copy_bench(tmp_path)
-    question_file.write_bytes(question_file.read_bytes().replace(b"\n", b"\r\n"))
+    question_file.write_bytes(question_file.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
     assert verify_benchmark(question_file)["questions_sha256"] == questions_sha256(QFILE)
     question_file.write_bytes(question_file.read_bytes() + b"\n{}\n")
     with pytest.raises(BenchmarkHashMismatch):
@@ -87,6 +87,18 @@ def test_run_experiment_aborts_before_loading_when_hash_mismatches(tmp_path):
     assert not output_dir.exists()
 
 
+def test_run_experiment_default_file_passes_the_manifest_guard(tmp_path):
+    group = f"default_path_{tmp_path.name}"
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "run_experiment.py"), "--group", group, "--exp", "E",
+         "--limit", "0", "--retrieval-only"],
+        capture_output=True, text=True, cwd=ROOT,
+    )
+    assert result.returncode != 0
+    assert "no accepted questions" in (result.stdout + result.stderr)
+    assert not (ROOT / "results" / group).exists()
+
+
 def test_verify_script_exit_codes(tmp_path):
     good = subprocess.run([sys.executable, str(ROOT / "scripts" / "verify_benchmark.py")],
                           capture_output=True, text=True, cwd=ROOT)
@@ -112,6 +124,17 @@ def test_oracle_sidecar_is_complete_and_matches_recorded_e_routes(tmp_path):
     partial.write_text(json.dumps({"labels": dict(list(labels.items())[1:])}), encoding="utf-8")
     with pytest.raises(BenchmarkProvenanceError, match="IDs do not match"):
         load_oracle_labels(partial, _question_ids())
+
+
+@pytest.mark.parametrize("bad_label", [["SIMPLE"], {"route": "SIMPLE"}])
+def test_oracle_sidecar_rejects_non_string_route_labels(tmp_path, bad_label):
+    labels = json.loads(SIDECAR.read_text(encoding="utf-8"))["labels"]
+    labels = dict(labels)
+    labels[next(iter(labels))] = bad_label
+    sidecar = tmp_path / "non_string_label.json"
+    sidecar.write_text(json.dumps({"labels": labels}), encoding="utf-8")
+    with pytest.raises(BenchmarkProvenanceError, match="route labels must be strings"):
+        load_oracle_labels(sidecar, _question_ids())
 
 
 def test_oracle_sidecar_is_rejected_for_non_oracle_experiments():

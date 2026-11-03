@@ -104,6 +104,12 @@ def load_oracle_labels(path: str | Path, question_ids) -> dict[str, str]:
         if extra:
             details.append(f"unknown IDs: {', '.join(extra[:3])}")
         raise BenchmarkProvenanceError(f"Oracle sidecar {sidecar} IDs do not match benchmark ({'; '.join(details)})")
+    non_string = sorted(key for key, value in labels.items() if not isinstance(value, str))
+    if non_string:
+        raise BenchmarkProvenanceError(
+            f"Oracle sidecar {sidecar} route labels must be strings; invalid values for: "
+            f"{', '.join(non_string[:3])}"
+        )
     invalid = sorted(key for key, value in labels.items() if value not in ORACLE_LABELS)
     if invalid:
         raise BenchmarkProvenanceError(
